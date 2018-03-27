@@ -1,0 +1,17 @@
+{
+  "name": "war-sandbox",
+  "version": "0.0.1",
+  "engines": {
+    "node": "9.8.0"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/server/server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "4.16.3",
+    "socket.io": "2.0.4"
+  }
+}
