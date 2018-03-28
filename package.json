@@ -11,6 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "babylonjs": "3.1.1",
+    "babylonjs-gui": "3.1.1",
     "express": "4.16.3",
     "socket.io": "2.0.4"
   }
