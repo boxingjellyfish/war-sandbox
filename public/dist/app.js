@@ -177,14 +177,9 @@ Game.prototype.createScene2 = function () {
 Game.prototype.createScene3 = function () {
     var scene = new BABYLON.Scene(this.engine);
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, Math.PI / 4, 200, new BABYLON.Vector3(30, -8, 60), scene);
+    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, 0, 200, new BABYLON.Vector3(30, -8, 60), scene);
     camera.attachControl(this.canvas, false);
-    var light = new BABYLON.PointLight("PointLight", new BABYLON.Vector3(5, 10, 2), scene);
 
-    // Map material creation
-    var polygonMaterial = new BABYLON.StandardMaterial("Material", scene)
-    polygonMaterial.diffuseColor = new BABYLON.Color3(0, 0.9, 0);
-    polygonMaterial.specularColor = new BABYLON.Color3(0, 0.9, 0);
 
     var map = new Level().createDefaultMap();
 
@@ -195,12 +190,45 @@ Game.prototype.createScene3 = function () {
                 shape.push(new BABYLON.Vector3(border.x, 0, border.y))
             }
             shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y))
-            let polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "Polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
+
+
+            var polygonMaterial = new BABYLON.StandardMaterial("Material", scene)
+            polygonMaterial.emissiveColor = new BABYLON.Color3(0, 0.1, 0);
+            var polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "Polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
             polygon.material = polygonMaterial;
             var lines = BABYLON.MeshBuilder.CreateLines(territory.id + "Lines", { points: shape, updatable: false, instance: null }, scene);
-            lines.color = new BABYLON.Color3(0, 0.3, 0);
+            lines.color = new BABYLON.Color3(0, 0.9, 0);
+
+            polygon.actionManager = new BABYLON.ActionManager(scene);
+            polygon.actionManager.registerAction(
+                new BABYLON.InterpolateValueAction(
+                    BABYLON.ActionManager.OnPointerOverTrigger,
+                    polygon.material,
+                    'emissiveColor',
+                    new BABYLON.Color3(0, 0.5, 0),
+                    100
+                )
+            );
+            polygon.actionManager.registerAction(
+                new BABYLON.InterpolateValueAction(
+                    BABYLON.ActionManager.OnPointerOutTrigger,
+                    polygon.material,
+                    'emissiveColor',
+                    new BABYLON.Color3(0, 0.1, 0),
+                    100
+                )
+            );
         }
     }
+
+    //When click event is raised
+    window.addEventListener("click", function () {
+        // We try to pick an object
+        var pickResult = scene.pick(scene.pointerX, scene.pointerY);
+        if (pickResult.hit && pickResult.pickedMesh.name == "Box") {
+            boxAnimatable.reset();
+        }
+    });
 
     this.createUI(scene);
 
@@ -340,7 +368,7 @@ Level.prototype.createDefaultMap = function () {
         id: "default",
         regions: [
             {
-                id: "n_america",
+                id: "north_america",
                 territories: [
                     {
                         id: "alaska",
@@ -384,6 +412,194 @@ Level.prototype.createDefaultMap = function () {
                             { x: 13, y: 30 },
                             { x: 13, y: 21 },
                             { x: 11, y: 20 }
+                        ]
+                    },
+                    {
+                        id: "vancouver",
+                        borders: [
+                            { x: 19, y: 11 },
+                            { x: 23, y: 13 },
+                            { x: 25, y: 12 },
+                            { x: 27, y: 13 },
+                            { x: 27, y: 21 },
+                            { x: 29, y: 22 },
+                            { x: 29, y: 25 },
+                            { x: 25, y: 27 },
+                            { x: 23, y: 26 },
+                            { x: 21, y: 27 },
+                            { x: 21, y: 23 },
+                            { x: 19, y: 22 }
+                        ]
+                    },
+                    {
+                        id: "ottawa",
+                        borders: [
+                            { x: 21, y: 27 },
+                            { x: 23, y: 26 },
+                            { x: 25, y: 27 },
+                            { x: 29, y: 25 },
+                            { x: 29, y: 29 },
+                            { x: 31, y: 30 },
+                            { x: 29, y: 31 },
+                            { x: 31, y: 32 },
+                            { x: 33, y: 31 },
+                            { x: 33, y: 36 },
+                            { x: 31, y: 37 },
+                            { x: 27, y: 35 },
+                            { x: 25, y: 36 },
+                            { x: 25, y: 35 },
+                            { x: 21, y: 33 }
+                        ]
+                    },
+                    {
+                        id: "labrador",
+                        borders: [
+                            { x: 21, y: 40 },
+                            { x: 29, y: 36 },
+                            { x: 31, y: 37 },
+                            { x: 33, y: 36 },
+                            { x: 33, y: 42 },
+                            { x: 35, y: 41 },
+                            { x: 35, y: 43 },
+                            { x: 33, y: 44 },
+                            { x: 29, y: 42 },
+                            { x: 29, y: 49 },
+                            { x: 27, y: 50 },
+                            { x: 27, y: 48 },
+                            { x: 25, y: 49 },
+                            { x: 23, y: 48 },
+                            { x: 23, y: 45 },
+                            { x: 21, y: 44 }
+                        ]
+                    },
+                    {
+                        id: "california",
+                        borders: [
+                            { x: 27, y: 10 },
+                            { x: 37, y: 5 },
+                            { x: 39, y: 6 },
+                            { x: 39, y: 8 },
+                            { x: 41, y: 9 },
+                            { x: 41, y: 11 },
+                            { x: 37, y: 13 },
+                            { x: 37, y: 21 },
+                            { x: 41, y: 23 },
+                            { x: 37, y: 25 },
+                            { x: 35, y: 24 },
+                            { x: 29, y: 27 },
+                            { x: 29, y: 22 },
+                            { x: 27, y: 21 }
+                        ]
+                    },
+                    {
+                        id: "new_york",
+                        borders: [
+                            { x: 29, y: 27 },
+                            { x: 35, y: 24 },
+                            { x: 37, y: 25 },
+                            { x: 41, y: 23 },
+                            { x: 37, y: 21 },
+                            { x: 37, y: 13 },
+                            { x: 41, y: 11 },
+                            { x: 45, y: 13 },
+                            { x: 45, y: 15 },
+                            { x: 47, y: 16 },
+                            { x: 45, y: 17 },
+                            { x: 45, y: 24 },
+                            { x: 47, y: 25 },
+                            { x: 49, y: 24 },
+                            { x: 49, y: 26 },
+                            { x: 47, y: 27 },
+                            { x: 45, y: 26 },
+                            { x: 43, y: 27 },
+                            { x: 43, y: 30 },
+                            { x: 39, y: 32 },
+                            { x: 39, y: 34 },
+                            { x: 37, y: 35 },
+                            { x: 37, y: 38 },
+                            { x: 33, y: 40 },
+                            { x: 33, y: 31 },
+                            { x: 35, y: 32 },
+                            { x: 35, y: 30 },
+                            { x: 33, y: 29 },
+                            { x: 35, y: 28 },
+                            { x: 33, y: 27 },
+                            { x: 29, y: 29 }
+                        ]
+                    },
+                    {
+                        id: "cuba",
+                        borders: [
+                            { x: 51, y: 24 },
+                            { x: 53, y: 25 },
+                            { x: 53, y: 28 },
+                            { x: 55, y: 29 },
+                            { x: 55, y: 31 },
+                            { x: 53, y: 32 },
+                            { x: 53, y: 28 },
+                            { x: 51, y: 27 }
+                        ]
+                    },
+                    {
+                        id: "mexico",
+                        borders: [
+                            { x: 39, y: 6 },
+                            { x: 43, y: 4 },
+                            { x: 47, y: 6 },
+                            { x: 47, y: 8 },
+                            { x: 43, y: 6 },
+                            { x: 41, y: 7 },
+                            { x: 49, y: 11 },
+                            { x: 49, y: 9 },
+                            { x: 53, y: 11 },
+                            { x: 53, y: 16 },
+                            { x: 61, y: 20 },
+                            { x: 61, y: 23 },
+                            { x: 63, y: 24 },
+                            { x: 61, y: 25 },
+                            { x: 59, y: 24 },
+                            { x: 59, y: 22 },
+                            { x: 57, y: 21 },
+                            { x: 55, y: 22 },
+                            { x: 53, y: 21 },
+                            { x: 51, y: 22 },
+                            { x: 49, y: 21 },
+                            { x: 49, y: 18 },
+                            { x: 51, y: 17 },
+                            { x: 51, y: 16 },
+                            { x: 49, y: 15 },
+                            { x: 47, y: 16 },
+                            { x: 45, y: 15 },
+                            { x: 45, y: 13 },
+                            { x: 41, y: 11 },
+                            { x: 41, y: 9 },
+                            { x: 39, y: 8 }
+                        ]
+                    },
+                    {
+                        id: "greenland",
+                        borders: [
+                            { x: 1, y: 61 },
+                            { x: 5, y: 59 },
+                            { x: 5, y: 57 },
+                            { x: 11, y: 54 },
+                            { x: 13, y: 55 },
+                            { x: 21, y: 51 },
+                            { x: 23, y: 52 },
+                            { x: 23, y: 55 },
+                            { x: 21, y: 56 },
+                            { x: 21, y: 59 },
+                            { x: 19, y: 60 },
+                            { x: 19, y: 66 },
+                            { x: 17, y: 67 },
+                            { x: 17, y: 70 },
+                            { x: 11, y: 73 },
+                            { x: 11, y: 76 },
+                            { x: 5, y: 79 },
+                            { x: 5, y: 81 },
+                            { x: 3, y: 82 },
+                            { x: 3, y: 78 },
+                            { x: 1, y: 77 }
                         ]
                     }
                 ]

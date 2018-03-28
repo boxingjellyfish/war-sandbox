@@ -176,14 +176,9 @@ Game.prototype.createScene2 = function () {
 Game.prototype.createScene3 = function () {
     var scene = new BABYLON.Scene(this.engine);
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, Math.PI / 4, 200, new BABYLON.Vector3(30, -8, 60), scene);
+    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, 0, 200, new BABYLON.Vector3(30, -8, 60), scene);
     camera.attachControl(this.canvas, false);
-    var light = new BABYLON.PointLight("PointLight", new BABYLON.Vector3(5, 10, 2), scene);
 
-    // Map material creation
-    var polygonMaterial = new BABYLON.StandardMaterial("Material", scene)
-    polygonMaterial.diffuseColor = new BABYLON.Color3(0, 0.9, 0);
-    polygonMaterial.specularColor = new BABYLON.Color3(0, 0.9, 0);
 
     var map = new Level().createDefaultMap();
 
@@ -194,12 +189,45 @@ Game.prototype.createScene3 = function () {
                 shape.push(new BABYLON.Vector3(border.x, 0, border.y))
             }
             shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y))
-            let polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "Polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
+
+
+            var polygonMaterial = new BABYLON.StandardMaterial("Material", scene)
+            polygonMaterial.emissiveColor = new BABYLON.Color3(0, 0.1, 0);
+            var polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "Polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
             polygon.material = polygonMaterial;
             var lines = BABYLON.MeshBuilder.CreateLines(territory.id + "Lines", { points: shape, updatable: false, instance: null }, scene);
-            lines.color = new BABYLON.Color3(0, 0.3, 0);
+            lines.color = new BABYLON.Color3(0, 0.9, 0);
+
+            polygon.actionManager = new BABYLON.ActionManager(scene);
+            polygon.actionManager.registerAction(
+                new BABYLON.InterpolateValueAction(
+                    BABYLON.ActionManager.OnPointerOverTrigger,
+                    polygon.material,
+                    'emissiveColor',
+                    new BABYLON.Color3(0, 0.5, 0),
+                    100
+                )
+            );
+            polygon.actionManager.registerAction(
+                new BABYLON.InterpolateValueAction(
+                    BABYLON.ActionManager.OnPointerOutTrigger,
+                    polygon.material,
+                    'emissiveColor',
+                    new BABYLON.Color3(0, 0.1, 0),
+                    100
+                )
+            );
         }
     }
+
+    //When click event is raised
+    window.addEventListener("click", function () {
+        // We try to pick an object
+        var pickResult = scene.pick(scene.pointerX, scene.pointerY);
+        if (pickResult.hit && pickResult.pickedMesh.name == "Box") {
+            boxAnimatable.reset();
+        }
+    });
 
     this.createUI(scene);
 
