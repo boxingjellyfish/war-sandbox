@@ -8,6 +8,8 @@ Level.prototype.createDefaultMap = function () {
         regions: [
             {
                 id: "north_america",
+                line_color: { h: 0.1, s: 0.9, l: 0.5 },
+                fill_color: { h: 0.1, s: 0.9, l: 0.3  },
                 territories: [
                     {
                         id: "alaska",
@@ -239,6 +241,32 @@ Level.prototype.createDefaultMap = function () {
                             { x: 3, y: 82 },
                             { x: 3, y: 78 },
                             { x: 1, y: 77 }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: "south_america",
+                line_color: { h: 0.3, s: 0.9, l: 0.5 },
+                fill_color: { h: 0.3, s: 0.9, l: 0.3  },
+                territories: [
+                    {
+                        id: "colombia_venezuela",
+                        borders: [
+                            { x: 57, y: 27 },
+                            { x: 67, y: 22 },
+                            { x: 67, y: 27 },
+                            { x: 69, y: 28 },
+                            { x: 67, y: 29 },
+                            { x: 65, y: 28 },
+                            { x: 65, y: 36 },
+                            { x: 67, y: 37 },
+                            { x: 67, y: 40 },
+                            { x: 65, y: 41 },
+                            { x: 63, y: 40 },
+                            { x: 63, y: 37 },
+                            { x: 59, y: 35 },
+                            { x: 59, y: 28 }
                         ]
                     }
                 ]

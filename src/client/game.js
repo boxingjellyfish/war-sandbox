@@ -1,4 +1,5 @@
 var Level = require("./level.js");
+var ColorHSL = require("./color_hsl.js");
 
 module.exports = Game = function (canvasElement) {
     // Create canvas and engine
@@ -179,7 +180,6 @@ Game.prototype.createScene3 = function () {
     var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, 0, 200, new BABYLON.Vector3(30, -8, 60), scene);
     camera.attachControl(this.canvas, false);
 
-
     var map = new Level().createDefaultMap();
 
     for (var region of map.regions) {
@@ -190,13 +190,12 @@ Game.prototype.createScene3 = function () {
             }
             shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y))
 
-
-            var polygonMaterial = new BABYLON.StandardMaterial("Material", scene)
-            polygonMaterial.emissiveColor = new BABYLON.Color3(0, 0.1, 0);
+            var polygonMaterial = new BABYLON.StandardMaterial(territory.id + "Material", scene)
+            polygonMaterial.emissiveColor = new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3();
             var polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "Polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
             polygon.material = polygonMaterial;
             var lines = BABYLON.MeshBuilder.CreateLines(territory.id + "Lines", { points: shape, updatable: false, instance: null }, scene);
-            lines.color = new BABYLON.Color3(0, 0.9, 0);
+            lines.color = new ColorHSL(region.line_color.h, region.line_color.s, region.line_color.l).toColor3();
 
             polygon.actionManager = new BABYLON.ActionManager(scene);
             polygon.actionManager.registerAction(
@@ -204,7 +203,7 @@ Game.prototype.createScene3 = function () {
                     BABYLON.ActionManager.OnPointerOverTrigger,
                     polygon.material,
                     'emissiveColor',
-                    new BABYLON.Color3(0, 0.5, 0),
+                    new ColorHSL(region.line_color.h, region.line_color.s, region.line_color.l).toColor3(),
                     100
                 )
             );
@@ -213,7 +212,7 @@ Game.prototype.createScene3 = function () {
                     BABYLON.ActionManager.OnPointerOutTrigger,
                     polygon.material,
                     'emissiveColor',
-                    new BABYLON.Color3(0, 0.1, 0),
+                    new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3(),
                     100
                 )
             );
