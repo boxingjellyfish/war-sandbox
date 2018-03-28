@@ -213,7 +213,7 @@ Game.prototype.createScene3 = function () {
                     polygon.material,
                     'emissiveColor',
                     new BABYLON.Color3(0, 0, 0),
-                    100
+                    400
                 )
             );
             polygon.actionManager.registerAction(
@@ -222,7 +222,20 @@ Game.prototype.createScene3 = function () {
                     function (evt) {
                         if (evt.meshUnderPointer) {
                             var meshClicked = evt.meshUnderPointer;
-                            console.log(meshClicked.name);
+                            var id = meshClicked.name.replace("_polygon", "");
+                            meshClicked.material.emissiveColor = new ColorHSL(0.6, 0.9, 0.3).toColor3();
+                            for (var region of map.regions) {
+                                for (var territory of region.territories) {
+                                    if (territory.id == id) {
+                                        if (territory.neighbours) {
+                                            for (var neighbour of territory.neighbours) {
+                                                var mesh = scene.getMeshByName(neighbour.id + "_polygon");
+                                                mesh.material.emissiveColor = new ColorHSL(0, 0.9, 0.3).toColor3();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 )

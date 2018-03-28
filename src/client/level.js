@@ -28,6 +28,11 @@ Level.prototype.createDefaultMap = function () {
                             { x: 15, y: 18 },
                             { x: 11, y: 20 },
                             { x: 11, y: 9 }
+                        ],
+                        neighbours: [
+                            { id: "vladivostok" },
+                            { id: "vancouver" },
+                            { id: "mackenzie" }
                         ]
                     },
                     {
@@ -53,6 +58,12 @@ Level.prototype.createDefaultMap = function () {
                             { x: 13, y: 30 },
                             { x: 13, y: 21 },
                             { x: 11, y: 20 }
+                        ],
+                        neighbours: [
+                            { id: "alaska" },
+                            { id: "vancouver" },
+                            { id: "ottawa" },
+                            { id: "greenland" }
                         ]
                     },
                     {
@@ -70,6 +81,12 @@ Level.prototype.createDefaultMap = function () {
                             { x: 21, y: 27 },
                             { x: 21, y: 23 },
                             { x: 19, y: 22 }
+                        ],
+                        neighbours: [
+                            { id: "alaska" },
+                            { id: "mackenzie" },
+                            { id: "ottawa" },
+                            { id: "california" }
                         ]
                     },
                     {
@@ -90,6 +107,13 @@ Level.prototype.createDefaultMap = function () {
                             { x: 25, y: 36 },
                             { x: 25, y: 35 },
                             { x: 21, y: 33 }
+                        ],
+                        neighbours: [
+                            { id: "vancouver" },
+                            { id: "mackenzie" },
+                            { id: "labrador" },
+                            { id: "new_york" },
+                            { id: "california" }
                         ]
                     },
                     {
@@ -111,6 +135,11 @@ Level.prototype.createDefaultMap = function () {
                             { x: 23, y: 48 },
                             { x: 23, y: 45 },
                             { x: 21, y: 44 }
+                        ],
+                        neighbours: [
+                            { id: "greenland" },
+                            { id: "new_york" },
+                            { id: "ottawa" }
                         ]
                     },
                     {
@@ -130,6 +159,12 @@ Level.prototype.createDefaultMap = function () {
                             { x: 29, y: 27 },
                             { x: 29, y: 22 },
                             { x: 27, y: 21 }
+                        ],
+                        neighbours: [
+                            { id: "vancouver" },
+                            { id: "ottawa" },
+                            { id: "new_york" },
+                            { id: "mexico" }
                         ]
                     },
                     {
@@ -166,6 +201,13 @@ Level.prototype.createDefaultMap = function () {
                             { x: 35, y: 28 },
                             { x: 33, y: 27 },
                             { x: 29, y: 29 }
+                        ],
+                        neighbours: [
+                            { id: "california" },
+                            { id: "ottawa" },
+                            { id: "labrador" },
+                            { id: "mexico" },
+                            { id: "cuba" }
                         ]
                     },
                     {
@@ -179,6 +221,10 @@ Level.prototype.createDefaultMap = function () {
                             { x: 53, y: 32 },
                             { x: 53, y: 28 },
                             { x: 51, y: 27 }
+                        ],
+                        neighbours: [
+                            { id: "mexico" },
+                            { id: "new_york" }
                         ]
                     },
                     {
@@ -215,6 +261,12 @@ Level.prototype.createDefaultMap = function () {
                             { x: 41, y: 11 },
                             { x: 41, y: 9 },
                             { x: 39, y: 8 }
+                        ],
+                        neighbours: [
+                            { id: "california" },
+                            { id: "new_york" },
+                            { id: "cuba" },
+                            { id: "colombia_venezuela" }
                         ]
                     },
                     {
@@ -241,6 +293,11 @@ Level.prototype.createDefaultMap = function () {
                             { x: 3, y: 82 },
                             { x: 3, y: 78 },
                             { x: 1, y: 77 }
+                        ],
+                        neighbours: [
+                            { id: "mackenzie" },
+                            { id: "labrador" },
+                            { id: "iceland" }
                         ]
                     }
                 ]
@@ -267,7 +324,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 63, y: 37 },
                             { x: 59, y: 35 },
                             { x: 59, y: 28 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "peru_bolivia_chile",
@@ -309,7 +367,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 69, y: 26 },
                             { x: 69, y: 28 },
                             { x: 67, y: 27 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "brazil",
@@ -341,7 +400,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 67, y: 40 },
                             { x: 67, y: 37 },
                             { x: 65, y: 36 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "argentina_uruguay",
@@ -369,7 +429,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 93, y: 37 },
                             { x: 89, y: 39 },
                             { x: 85, y: 37 }
-                        ]
+                        ],
+                        neighbours: []
                     }
                 ]
             },
@@ -402,7 +463,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 51, y: 85 },
                             { x: 47, y: 87 },
                             { x: 45, y: 86 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "egypt",
@@ -424,7 +486,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 49, y: 99 },
                             { x: 49, y: 90 },
                             { x: 47, y: 89 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "sudan",
@@ -451,7 +514,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 57, y: 94 },
                             { x: 57, y: 92 },
                             { x: 55, y: 91 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "congo",
@@ -470,7 +534,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 69, y: 96 },
                             { x: 69, y: 90 },
                             { x: 71, y: 89 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "south_africa",
@@ -491,7 +556,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 87, y: 93 },
                             { x: 87, y: 90 },
                             { x: 85, y: 89 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "madagascar",
@@ -506,7 +572,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 85, y: 110 },
                             { x: 83, y: 109 },
                             { x: 85, y: 108 }
-                        ]
+                        ],
+                        neighbours: []
                     }
                 ]
             },
@@ -536,7 +603,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 19, y: 118 },
                             { x: 19, y: 114 },
                             { x: 13, y: 111 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "aral",
@@ -558,7 +626,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 41, y: 122 },
                             { x: 39, y: 123 },
                             { x: 33, y: 120 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "middle_east",
@@ -589,7 +658,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 45, y: 108 },
                             { x: 43, y: 107 },
                             { x: 43, y: 98 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "dudinka",
@@ -624,7 +694,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 15, y: 126 },
                             { x: 15, y: 118 },
                             { x: 13, y: 117 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "india",
@@ -652,7 +723,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 47, y: 122 },
                             { x: 45, y: 121 },
                             { x: 45, y: 117 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "siberia",
@@ -679,7 +751,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 17, y: 135 },
                             { x: 17, y: 133 },
                             { x: 15, y: 132 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "chita",
@@ -706,7 +779,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 31, y: 137 },
                             { x: 31, y: 134 },
                             { x: 27, y: 132 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "mongolia",
@@ -727,7 +801,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 39, y: 133 },
                             { x: 39, y: 129 },
                             { x: 37, y: 128 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "china",
@@ -767,7 +842,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 43, y: 125 },
                             { x: 43, y: 122 },
                             { x: 45, y: 123 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "vietnam",
@@ -786,7 +862,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 59, y: 140 },
                             { x: 61, y: 139 },
                             { x: 55, y: 136 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "vladivostok",
@@ -831,7 +908,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 19, y: 140 },
                             { x: 19, y: 138 },
                             { x: 17, y: 137 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "japan",
@@ -850,7 +928,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 47, y: 164 },
                             { x: 45, y: 165 },
                             { x: 43, y: 164 }
-                        ]
+                        ],
+                        neighbours: []
                     }
                 ]
             },
@@ -884,7 +963,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 13, y: 92 },
                             { x: 13, y: 90 },
                             { x: 15, y: 89 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "iceland",
@@ -895,7 +975,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 23, y: 78 },
                             { x: 21, y: 79 },
                             { x: 19, y: 78 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "england",
@@ -913,7 +994,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 29, y: 73 },
                             { x: 27, y: 74 },
                             { x: 25, y: 73 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "germany",
@@ -927,7 +1009,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 31, y: 90 },
                             { x: 29, y: 91 },
                             { x: 25, y: 89 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "france_spain_portugal_italy",
@@ -952,7 +1035,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 33, y: 80 },
                             { x: 33, y: 78 },
                             { x: 37, y: 80 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "poland_yugoslavia",
@@ -976,7 +1060,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 35, y: 94 },
                             { x: 33, y: 95 },
                             { x: 27, y: 92 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "moscow",
@@ -1028,7 +1113,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 13, y: 101 },
                             { x: 13, y: 103 },
                             { x: 11, y: 102 }
-                        ]
+                        ],
+                        neighbours: []
                     }
                 ]
             },
@@ -1072,7 +1158,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 91, y: 142 },
                             { x: 91, y: 140 },
                             { x: 93, y: 139 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "sumatra",
@@ -1084,7 +1171,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 85, y: 138 },
                             { x: 83, y: 139 },
                             { x: 75, y: 135 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "borneo",
@@ -1107,7 +1195,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 75, y: 147 },
                             { x: 75, y: 144 },
                             { x: 77, y: 143 }
-                        ]
+                        ],
+                        neighbours: []
                     },
                     {
                         id: "new_guinea",
@@ -1121,7 +1210,8 @@ Level.prototype.createDefaultMap = function () {
                             { x: 91, y: 161 },
                             { x: 85, y: 158 },
                             { x: 85, y: 156 }
-                        ]
+                        ],
+                        neighbours: []
                     }
                 ]
             }
