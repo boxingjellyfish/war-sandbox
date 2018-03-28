@@ -177,7 +177,7 @@ Game.prototype.createScene2 = function () {
 Game.prototype.createScene3 = function () {
     var scene = new BABYLON.Scene(this.engine);
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, Math.PI / 8, 200, new BABYLON.Vector3(60, -8, 100), scene);
+    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, Math.PI / 8, 150, new BABYLON.Vector3(60, -8, 100), scene);
     camera.attachControl(this.canvas, false);
 
     var map = new Level().createDefaultMap();
@@ -191,7 +191,8 @@ Game.prototype.createScene3 = function () {
             shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y))
 
             var polygonMaterial = new BABYLON.StandardMaterial(territory.id + "_material", scene)
-            polygonMaterial.emissiveColor = new BABYLON.Color4(0, 0, 0);
+            //polygonMaterial.emissiveColor = new BABYLON.Color4(0, 0, 0);
+            polygonMaterial.emissiveColor = new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3();
             var polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "_polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
             polygon.material = polygonMaterial;
             var lines = BABYLON.MeshBuilder.CreateLines(territory.id + "_lines", { points: shape, updatable: false, instance: null }, scene);
@@ -212,7 +213,7 @@ Game.prototype.createScene3 = function () {
                     BABYLON.ActionManager.OnPointerOutTrigger,
                     polygon.material,
                     'emissiveColor',
-                    new BABYLON.Color3(0, 0, 0),
+                    new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3(),
                     400
                 )
             );
@@ -243,14 +244,14 @@ Game.prototype.createScene3 = function () {
         }
     }
 
-    //When click event is raised
-    window.addEventListener("click", function () {
-        // We try to pick an object
-        var pickResult = scene.pick(scene.pointerX, scene.pointerY);
-        if (pickResult.hit && pickResult.pickedMesh.name == "Box") {
-            boxAnimatable.reset();
+    for (var connection of map.connections) {
+        var points = [];
+        for (var point of connection.points) {
+            points.push(new BABYLON.Vector3(point.x, 0, point.y));
         }
-    });
+        var dashedLines = BABYLON.MeshBuilder.CreateDashedLines(connection.id + "_connection", { points: points, dashSize: 1, dashNb: 10 }, scene);
+        dashedLines.color = new ColorHSL(1, 1, 1).toColor3();
+    }
 
     this.createUI(scene);
 

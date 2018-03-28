@@ -251,7 +251,7 @@ Game.prototype.createScene2 = function () {
 Game.prototype.createScene3 = function () {
     var scene = new BABYLON.Scene(this.engine);
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, Math.PI / 8, 200, new BABYLON.Vector3(60, -8, 100), scene);
+    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, Math.PI / 8, 150, new BABYLON.Vector3(60, -8, 100), scene);
     camera.attachControl(this.canvas, false);
 
     var map = new Level().createDefaultMap();
@@ -265,7 +265,8 @@ Game.prototype.createScene3 = function () {
             shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y))
 
             var polygonMaterial = new BABYLON.StandardMaterial(territory.id + "_material", scene)
-            polygonMaterial.emissiveColor = new BABYLON.Color4(0, 0, 0);
+            //polygonMaterial.emissiveColor = new BABYLON.Color4(0, 0, 0);
+            polygonMaterial.emissiveColor = new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3();
             var polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "_polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
             polygon.material = polygonMaterial;
             var lines = BABYLON.MeshBuilder.CreateLines(territory.id + "_lines", { points: shape, updatable: false, instance: null }, scene);
@@ -286,7 +287,7 @@ Game.prototype.createScene3 = function () {
                     BABYLON.ActionManager.OnPointerOutTrigger,
                     polygon.material,
                     'emissiveColor',
-                    new BABYLON.Color3(0, 0, 0),
+                    new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3(),
                     400
                 )
             );
@@ -317,14 +318,14 @@ Game.prototype.createScene3 = function () {
         }
     }
 
-    //When click event is raised
-    window.addEventListener("click", function () {
-        // We try to pick an object
-        var pickResult = scene.pick(scene.pointerX, scene.pointerY);
-        if (pickResult.hit && pickResult.pickedMesh.name == "Box") {
-            boxAnimatable.reset();
+    for (var connection of map.connections) {
+        var points = [];
+        for (var point of connection.points) {
+            points.push(new BABYLON.Vector3(point.x, 0, point.y));
         }
-    });
+        var dashedLines = BABYLON.MeshBuilder.CreateDashedLines(connection.id + "_connection", { points: points, dashSize: 1, dashNb: 10 }, scene);
+        dashedLines.color = new ColorHSL(1, 1, 1).toColor3();
+    }
 
     this.createUI(scene);
 
@@ -1670,6 +1671,87 @@ Level.prototype.createDefaultMap = function () {
                         ],
                         neighbours: []
                     }
+                ]
+            }
+        ],
+        connections: [
+            {
+                id: "south_america_africa",
+                points: [
+                    { x: 71, y: 52 },
+                    { x: 59, y: 58 },
+                    { x: 59, y: 67 }
+                ]
+            },
+            {
+                id: "mexico_cuba",
+                points: [
+                    { x: 53, y: 21 },
+                    { x: 53, y: 25 }
+                ]
+            },
+            {
+                id: "new_york_cuba",
+                points: [
+                    { x: 49, y: 26 },
+                    { x: 51, y: 27 }
+                ]
+            },
+            {
+                id: "mackenzie_greenland",
+                points: [
+                    { x: 17, y: 45 },
+                    { x: 17, y: 53 }
+                ]
+            },
+            {
+                id: "labrador_greenland",
+                points: [
+                    { x: 27, y: 50 },
+                    { x: 23, y: 52 }
+                ]
+            },
+            {
+                id: "vladivostok_alaska",
+                points: [
+                    { x: 25, y: 162 },
+                    { x: 25, y: 168 }
+                ]
+            },
+            {
+                id: "alaska_vladivostok",
+                points: [
+                    { x: 19, y: 2 },
+                    { x: 25, y: -1 },
+                    { x: 25, y: -7 }
+                ]
+            },
+            {
+                id: "greenland_iceland",
+                points: [
+                    { x: 13, y: 72 },
+                    { x: 19, y: 75 }
+                ]
+            },
+            {
+                id: "iceland_sweden",
+                points: [
+                    { x: 19, y: 78 },
+                    { x: 19, y: 82 }
+                ]
+            },
+            {
+                id: "iceland_england",
+                points: [
+                    { x: 21, y: 74 },
+                    { x: 25, y: 72 }
+                ]
+            },
+            {
+                id: "sweden_england",
+                points: [
+                    { x: 19, y: 82 },
+                    { x: 31, y: 76 }
                 ]
             }
         ]

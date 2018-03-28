@@ -1215,6 +1215,87 @@ Level.prototype.createDefaultMap = function () {
                     }
                 ]
             }
+        ],
+        connections: [
+            {
+                id: "south_america_africa",
+                points: [
+                    { x: 71, y: 52 },
+                    { x: 59, y: 58 },
+                    { x: 59, y: 67 }
+                ]
+            },
+            {
+                id: "mexico_cuba",
+                points: [
+                    { x: 53, y: 21 },
+                    { x: 53, y: 25 }
+                ]
+            },
+            {
+                id: "new_york_cuba",
+                points: [
+                    { x: 49, y: 26 },
+                    { x: 51, y: 27 }
+                ]
+            },
+            {
+                id: "mackenzie_greenland",
+                points: [
+                    { x: 17, y: 45 },
+                    { x: 17, y: 53 }
+                ]
+            },
+            {
+                id: "labrador_greenland",
+                points: [
+                    { x: 27, y: 50 },
+                    { x: 23, y: 52 }
+                ]
+            },
+            {
+                id: "vladivostok_alaska",
+                points: [
+                    { x: 25, y: 162 },
+                    { x: 25, y: 168 }
+                ]
+            },
+            {
+                id: "alaska_vladivostok",
+                points: [
+                    { x: 19, y: 2 },
+                    { x: 25, y: -1 },
+                    { x: 25, y: -7 }
+                ]
+            },
+            {
+                id: "greenland_iceland",
+                points: [
+                    { x: 13, y: 72 },
+                    { x: 19, y: 75 }
+                ]
+            },
+            {
+                id: "iceland_sweden",
+                points: [
+                    { x: 19, y: 78 },
+                    { x: 19, y: 82 }
+                ]
+            },
+            {
+                id: "iceland_england",
+                points: [
+                    { x: 21, y: 74 },
+                    { x: 25, y: 72 }
+                ]
+            },
+            {
+                id: "sweden_england",
+                points: [
+                    { x: 19, y: 82 },
+                    { x: 31, y: 76 }
+                ]
+            }
         ]
     };
 
