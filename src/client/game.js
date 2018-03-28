@@ -1,4 +1,3 @@
-(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 var Level = require("./level.js");
 
 module.exports = Game = function (canvasElement) {
@@ -330,67 +329,3 @@ var socket = io();
 socket.on("time", function (timeString) {
     console.log("Server time: " + timeString);
 });
-},{"./level.js":2}],2:[function(require,module,exports){
-module.exports = Level = function () {
-
-};
-
-Level.prototype.createDefaultMap = function () {
-    var map = {
-        id: "default",
-        regions: [
-            {
-                id: "n_america",
-                territories: [
-                    {
-                        id: "alaska",
-                        borders: [
-                            { x: 11, y: 9 },
-                            { x: 13, y: 8 },
-                            { x: 13, y: 5 },
-                            { x: 19, y: 2 },
-                            { x: 19, y: 4 },
-                            { x: 17, y: 5 },
-                            { x: 17, y: 10 },
-                            { x: 19, y: 11 },
-                            { x: 19, y: 15 },
-                            { x: 17, y: 14 },
-                            { x: 15, y: 15 },
-                            { x: 15, y: 18 },
-                            { x: 11, y: 20 },
-                            { x: 11, y: 9 }
-                        ]
-                    },
-                    {
-                        id: "mackenzie",
-                        borders: [
-                            { x: 11, y: 20 },
-                            { x: 15, y: 18 },
-                            { x: 15, y: 15 },
-                            { x: 17, y: 14 },
-                            { x: 19, y: 15 },
-                            { x: 19, y: 22 },
-                            { x: 21, y: 23 },
-                            { x: 21, y: 35 },
-                            { x: 19, y: 36 },
-                            { x: 19, y: 40 },
-                            { x: 17, y: 41 },
-                            { x: 17, y: 45 },
-                            { x: 15, y: 44 },
-                            { x: 15, y: 42 },
-                            { x: 13, y: 41 },
-                            { x: 15, y: 40 },
-                            { x: 15, y: 31 },
-                            { x: 13, y: 30 },
-                            { x: 13, y: 21 },
-                            { x: 11, y: 20 }
-                        ]
-                    }
-                ]
-            }
-        ]
-    };
-
-    return map;
-}
-},{}]},{},[1]);

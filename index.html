@@ -22,19 +22,12 @@
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
     <link href="https://fonts.googleapis.com/css?family=Share+Tech+Mono" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nova+Mono" rel="stylesheet">
-    <script src="/lib/babylon.js"></script>
+    <script src="/lib/babylon.min.js"></script>
+    <script src="/lib/babylon.gui.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
-    <p id="server-time"></p>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        var socket = io();
-        var el = document.getElementById("server-time");
-        socket.on("time", function (timeString) {
-            el.innerHTML = "Server time: " + timeString;
-        });
-    </script>
     <canvas id="renderCanvas"></canvas>
     <script src="/dist/app.js"></script>
 </body>
