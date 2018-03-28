@@ -177,7 +177,7 @@ Game.prototype.createScene2 = function () {
 Game.prototype.createScene3 = function () {
     var scene = new BABYLON.Scene(this.engine);
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, 0, 200, new BABYLON.Vector3(30, -8, 60), scene);
+    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, Math.PI / 8, 200, new BABYLON.Vector3(60, -8, 100), scene);
     camera.attachControl(this.canvas, false);
 
     var map = new Level().createDefaultMap();
@@ -190,11 +190,11 @@ Game.prototype.createScene3 = function () {
             }
             shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y))
 
-            var polygonMaterial = new BABYLON.StandardMaterial(territory.id + "Material", scene)
-            polygonMaterial.emissiveColor = new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3();
-            var polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "Polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
+            var polygonMaterial = new BABYLON.StandardMaterial(territory.id + "_material", scene)
+            polygonMaterial.emissiveColor = new BABYLON.Color4(0, 0, 0);
+            var polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "_polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
             polygon.material = polygonMaterial;
-            var lines = BABYLON.MeshBuilder.CreateLines(territory.id + "Lines", { points: shape, updatable: false, instance: null }, scene);
+            var lines = BABYLON.MeshBuilder.CreateLines(territory.id + "_lines", { points: shape, updatable: false, instance: null }, scene);
             lines.color = new ColorHSL(region.line_color.h, region.line_color.s, region.line_color.l).toColor3();
 
             polygon.actionManager = new BABYLON.ActionManager(scene);
@@ -212,8 +212,19 @@ Game.prototype.createScene3 = function () {
                     BABYLON.ActionManager.OnPointerOutTrigger,
                     polygon.material,
                     'emissiveColor',
-                    new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3(),
+                    new BABYLON.Color3(0, 0, 0),
                     100
+                )
+            );
+            polygon.actionManager.registerAction(
+                new BABYLON.ExecuteCodeAction(
+                    BABYLON.ActionManager.OnPickTrigger,
+                    function (evt) {
+                        if (evt.meshUnderPointer) {
+                            var meshClicked = evt.meshUnderPointer;
+                            console.log(meshClicked.name);
+                        }
+                    }
                 )
             );
         }
