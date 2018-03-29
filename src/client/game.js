@@ -1,6 +1,4 @@
-var Level = require("./level.js");
 var ColorHSL = require("./util/color_hsl.js");
-var ApiClient = require("./util/api_client.js");
 
 module.exports = Game = function (canvasElement) {
     // Create canvas and engine
@@ -31,7 +29,7 @@ module.exports = Game = function (canvasElement) {
     socket.on("load_map", function (map) {
         console.log("Map recieved: " + map);
         that.map = map;
-        that.loadMap(that.scene);
+        that.loadMap();
     });
 
     socket.emit("client_ready", new Date().toDateString());
@@ -205,11 +203,9 @@ Game.prototype.createScene3 = function () {
     return scene;
 }
 
-Game.prototype.loadMap = function (scene) {
-    //var map = new Level().createDefaultMap();
-    var map = this.map;
+Game.prototype.loadMap = function () {
 
-    for (var region of map.regions) {
+    for (var region of this.map.regions) {
         for (var territory of region.territories) {
             var shape = [];
             for (var border of territory.borders) {
@@ -217,15 +213,15 @@ Game.prototype.loadMap = function (scene) {
             }
             shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y))
 
-            var polygonMaterial = new BABYLON.StandardMaterial(territory.id + "_material", scene)
+            var polygonMaterial = new BABYLON.StandardMaterial(territory.id + "_material", this.scene)
             //polygonMaterial.emissiveColor = new BABYLON.Color4(0, 0, 0);
             polygonMaterial.emissiveColor = new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3();
-            var polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "_polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
+            var polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "_polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
             polygon.material = polygonMaterial;
-            var lines = BABYLON.MeshBuilder.CreateLines(territory.id + "_lines", { points: shape, updatable: false, instance: null }, scene);
+            var lines = BABYLON.MeshBuilder.CreateLines(territory.id + "_lines", { points: shape, updatable: false, instance: null }, this.scene);
             lines.color = new ColorHSL(region.line_color.h, region.line_color.s, region.line_color.l).toColor3();
 
-            polygon.actionManager = new BABYLON.ActionManager(scene);
+            polygon.actionManager = new BABYLON.ActionManager(this.scene);
             polygon.actionManager.registerAction(
                 new BABYLON.InterpolateValueAction(
                     BABYLON.ActionManager.OnPointerOverTrigger,
@@ -252,12 +248,12 @@ Game.prototype.loadMap = function (scene) {
                             var meshClicked = evt.meshUnderPointer;
                             var id = meshClicked.name.replace("_polygon", "");
                             meshClicked.material.emissiveColor = new ColorHSL(0.6, 0.9, 0.3).toColor3();
-                            for (var region of map.regions) {
+                            for (var region of this.map.regions) {
                                 for (var territory of region.territories) {
                                     if (territory.id == id) {
                                         if (territory.neighbours) {
                                             for (var neighbour of territory.neighbours) {
-                                                var mesh = scene.getMeshByName(neighbour.id + "_polygon");
+                                                var mesh = this.scene.getMeshByName(neighbour.id + "_polygon");
                                                 mesh.material.emissiveColor = new ColorHSL(0, 0.9, 0.3).toColor3();
                                             }
                                         }
@@ -271,12 +267,12 @@ Game.prototype.loadMap = function (scene) {
         }
     }
 
-    for (var connection of map.connections) {
+    for (var connection of this.map.connections) {
         var points = [];
         for (var point of connection.points) {
             points.push(new BABYLON.Vector3(point.x, 0, point.y));
         }
-        var dashedLines = BABYLON.MeshBuilder.CreateDashedLines(connection.id + "_connection", { points: points, dashSize: 1, dashNb: 10 }, scene);
+        var dashedLines = BABYLON.MeshBuilder.CreateDashedLines(connection.id + "_connection", { points: points, dashSize: 1, dashNb: 10 }, this.scene);
         dashedLines.color = new ColorHSL(1, 1, 1).toColor3();
     }
 }
