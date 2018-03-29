@@ -2,10 +2,10 @@
 var ColorHSL = require("./util/color_hsl.js");
 
 module.exports = Game = function (canvasElement) {
-    // Create canvas and engine
     this.canvas = document.getElementById(canvasElement);
     this.engine = new BABYLON.Engine(this.canvas, true);
     this.map = null;
+    this.socket = io();
 
     var that = this;
     // Listen for browser/canvas resize events
@@ -18,22 +18,20 @@ module.exports = Game = function (canvasElement) {
         e.preventDefault();
     };
 
-    
-    that.scene = that.createScene3();
 
-    // Socket io
-    var socket = io();
-    socket.on("time", function (timeString) {
+    this.scene = this.createScene3();
+
+    this.socket.on("time", function (timeString) {
         console.log("Server time: " + timeString);
     });
 
-    socket.on("load_map", function (map) {
+    this.socket.on("load_map", function (map) {
         console.log("Map recieved: " + map);
         that.map = map;
         that.loadMap();
     });
 
-    socket.emit("client_ready", new Date().toDateString());
+    this.socket.emit("client_ready", new Date().toDateString());
 
 };
 
@@ -194,33 +192,32 @@ Game.prototype.createScene2 = function () {
 Game.prototype.createScene3 = function () {
     var scene = new BABYLON.Scene(this.engine);
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, Math.PI / 8, 150, new BABYLON.Vector3(60, -8, 100), scene);
+    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), scene);
     camera.attachControl(this.canvas, false);
-
-    
-
     this.createUI(scene);
-
     return scene;
 }
 
 Game.prototype.loadMap = function () {
-
+    var that = this;
     for (var region of this.map.regions) {
         for (var territory of region.territories) {
+            var points = [];
             var shape = [];
             for (var border of territory.borders) {
+                points.push(new BABYLON.Vector3(border.x, border.y, 0))
                 shape.push(new BABYLON.Vector3(border.x, 0, border.y))
             }
+            points.push(new BABYLON.Vector3(territory.borders[0].x, territory.borders[0].y, 0))
             shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y))
 
             var polygonMaterial = new BABYLON.StandardMaterial(territory.id + "_material", this.scene)
-            //polygonMaterial.emissiveColor = new BABYLON.Color4(0, 0, 0);
-            polygonMaterial.emissiveColor = new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3();
+            polygonMaterial.emissiveColor = new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3();
             var polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "_polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
             polygon.material = polygonMaterial;
-            var lines = BABYLON.MeshBuilder.CreateLines(territory.id + "_lines", { points: shape, updatable: false, instance: null }, this.scene);
-            lines.color = new ColorHSL(region.line_color.h, region.line_color.s, region.line_color.l).toColor3();
+            polygon.rotate(BABYLON.Axis.X, -Math.PI / 2, BABYLON.Space.WORLD);
+            var lines = BABYLON.MeshBuilder.CreateLines(territory.id + "_lines", { points: points, updatable: false, instance: null }, this.scene);
+            lines.color = new ColorHSL(region.color.h, region.color.s, 0.5).toColor3();
 
             polygon.actionManager = new BABYLON.ActionManager(this.scene);
             polygon.actionManager.registerAction(
@@ -228,7 +225,7 @@ Game.prototype.loadMap = function () {
                     BABYLON.ActionManager.OnPointerOverTrigger,
                     polygon.material,
                     'emissiveColor',
-                    new ColorHSL(region.line_color.h, region.line_color.s, region.line_color.l).toColor3(),
+                    new ColorHSL(region.color.h, region.color.s, 0.5).toColor3(),
                     100
                 )
             );
@@ -237,7 +234,7 @@ Game.prototype.loadMap = function () {
                     BABYLON.ActionManager.OnPointerOutTrigger,
                     polygon.material,
                     'emissiveColor',
-                    new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3(),
+                    new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3(),
                     100
                 )
             );
@@ -245,22 +242,10 @@ Game.prototype.loadMap = function () {
                 new BABYLON.ExecuteCodeAction(
                     BABYLON.ActionManager.OnPickTrigger,
                     function (evt) {
+                        console.log("execute action");
                         if (evt.meshUnderPointer) {
                             var meshClicked = evt.meshUnderPointer;
-                            var id = meshClicked.name.replace("_polygon", "");
-                            meshClicked.material.emissiveColor = new ColorHSL(0.6, 0.9, 0.3).toColor3();
-                            for (var region of this.map.regions) {
-                                for (var territory of region.territories) {
-                                    if (territory.id == id) {
-                                        if (territory.neighbours) {
-                                            for (var neighbour of territory.neighbours) {
-                                                var mesh = this.scene.getMeshByName(neighbour.id + "_polygon");
-                                                mesh.material.emissiveColor = new ColorHSL(0, 0.9, 0.3).toColor3();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            that.onTerrytoryClicked(meshClicked);
                         }
                     }
                 )
@@ -268,13 +253,31 @@ Game.prototype.loadMap = function () {
         }
     }
 
+    var discMaterial = new BABYLON.StandardMaterial("disc_material", this.scene)
+    discMaterial.emissiveColor = new ColorHSL(0, 0, 0.7).toColor3();
     for (var connection of this.map.connections) {
-        var points = [];
         for (var point of connection.points) {
-            points.push(new BABYLON.Vector3(point.x, 0, point.y));
+            var disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.5, arc: 1, tessellation: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
+            disc.position = new BABYLON.Vector3(point.x, point.y, 0);
+            disc.material = discMaterial;
         }
-        var dashedLines = BABYLON.MeshBuilder.CreateDashedLines(connection.id + "_connection", { points: points, dashSize: 1, dashNb: 10 }, this.scene);
-        dashedLines.color = new ColorHSL(1, 1, 1).toColor3();
+    }
+}
+
+Game.prototype.onTerrytoryClicked = function (meshClicked) {
+    var id = meshClicked.name.replace("_polygon", "");
+    meshClicked.material.emissiveColor = new ColorHSL(0.6, 0.9, 0.3).toColor3();
+    for (var region of this.map.regions) {
+        for (var territory of region.territories) {
+            if (territory.id == id) {
+                if (territory.neighbours) {
+                    for (var neighbour of territory.neighbours) {
+                        var mesh = this.scene.getMeshByName(neighbour.id + "_polygon");
+                        mesh.material.emissiveColor = new ColorHSL(0, 0.9, 0.3).toColor3();
+                    }
+                }
+            }
+        }
     }
 }
 
