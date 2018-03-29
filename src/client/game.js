@@ -1,10 +1,12 @@
 var Level = require("./level.js");
-var ColorHSL = require("./color_hsl.js");
+var ColorHSL = require("./util/color_hsl.js");
+var ApiClient = require("./util/api_client.js");
 
 module.exports = Game = function (canvasElement) {
     // Create canvas and engine
     this.canvas = document.getElementById(canvasElement);
     this.engine = new BABYLON.Engine(this.canvas, true);
+    this.map = null;
 
     var that = this;
     // Listen for browser/canvas resize events
@@ -17,7 +19,23 @@ module.exports = Game = function (canvasElement) {
         e.preventDefault();
     };
 
-    this.scene = this.createScene3();
+    
+    that.scene = that.createScene3();
+
+    // Socket io
+    var socket = io();
+    socket.on("time", function (timeString) {
+        console.log("Server time: " + timeString);
+    });
+
+    socket.on("load_map", function (map) {
+        console.log("Map recieved: " + map);
+        that.map = map;
+        that.loadMap(that.scene);
+    });
+
+    socket.emit("client_ready", new Date().toDateString());
+
 };
 
 Game.prototype.createScene1 = function () {
@@ -180,7 +198,16 @@ Game.prototype.createScene3 = function () {
     var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, Math.PI / 8, 150, new BABYLON.Vector3(60, -8, 100), scene);
     camera.attachControl(this.canvas, false);
 
-    var map = new Level().createDefaultMap();
+    
+
+    this.createUI(scene);
+
+    return scene;
+}
+
+Game.prototype.loadMap = function (scene) {
+    //var map = new Level().createDefaultMap();
+    var map = this.map;
 
     for (var region of map.regions) {
         for (var territory of region.territories) {
@@ -214,7 +241,7 @@ Game.prototype.createScene3 = function () {
                     polygon.material,
                     'emissiveColor',
                     new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3(),
-                    400
+                    100
                 )
             );
             polygon.actionManager.registerAction(
@@ -252,10 +279,6 @@ Game.prototype.createScene3 = function () {
         var dashedLines = BABYLON.MeshBuilder.CreateDashedLines(connection.id + "_connection", { points: points, dashSize: 1, dashNb: 10 }, scene);
         dashedLines.color = new ColorHSL(1, 1, 1).toColor3();
     }
-
-    this.createUI(scene);
-
-    return scene;
 }
 
 Game.prototype.createUI = function (scene) {
@@ -376,8 +399,3 @@ console.log("Game object created");
 game.run();
 console.log("Run started");
 
-// Socket io
-var socket = io();
-socket.on("time", function (timeString) {
-    console.log("Server time: " + timeString);
-});

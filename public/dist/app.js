@@ -1,84 +1,13 @@
 (function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
-module.exports = ColorHSL = function (h, s, l) {
-    this.h = h;
-    this.s = s;
-    this.l = l;
-};
-
-/**
- * Converts an HSL color value to RGB. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
- * Assumes h, s, and l are contained in the set [0, 1] and
- * returns r, g, and b in the set [0, 1].
- *
- * @param   {number}  h       The hue
- * @param   {number}  s       The saturation
- * @param   {number}  l       The lightness
- * @return  {Color3}          The RGB representation
- */
-ColorHSL.prototype.toColor3 = function () {
-    var r, g, b;
-
-    if (this.s == 0) {
-        r = g = b = this.l; // achromatic
-    }
-    else {
-        var hue2rgb = function hue2rgb(p, q, t) {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1 / 6) return p + (q - p) * 6 * t;
-            if (t < 1 / 2) return q;
-            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-            return p;
-        }
-
-        var q = this.l < 0.5 ? this.l * (1 + this.s) : this.l + this.s - this.l * this.s;
-        var p = 2 * this.l - q;
-        r = hue2rgb(p, q, this.h + 1 / 3);
-        g = hue2rgb(p, q, this.h);
-        b = hue2rgb(p, q, this.h - 1 / 3);
-    }
-    return new BABYLON.Color3(r, g, b);
-}
-
-/**
- * Converts an RGB color value to HSL. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
- * Assumes r, g, and b are contained in the set [0, 1] and
- * returns h, s, and l in the set [0, 1].
- *
- * @param   {number}  r       The red color value
- * @param   {number}  g       The green color value
- * @param   {number}  b       The blue color value
- */
-ColorHSL.prototype.fromColor3 = function (r, g, b) {
-    var max = Math.max(r, g, b), min = Math.min(r, g, b);
-    this.h = (max + min) / 2;
-    this.s = (max + min) / 2;
-    this.l = (max + min) / 2;
-
-    if (max == min) {
-        this.h = this.s = 0; // achromatic
-    }
-    else {
-        var d = max - min;
-        this.s = this.l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-            case r: this.h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: this.h = (b - r) / d + 2; break;
-            case b: this.h = (r - g) / d + 4; break;
-        }
-        this.h /= 6;
-    }
-}
-},{}],2:[function(require,module,exports){
 var Level = require("./level.js");
-var ColorHSL = require("./color_hsl.js");
+var ColorHSL = require("./util/color_hsl.js");
+var ApiClient = require("./util/api_client.js");
 
 module.exports = Game = function (canvasElement) {
     // Create canvas and engine
     this.canvas = document.getElementById(canvasElement);
     this.engine = new BABYLON.Engine(this.canvas, true);
+    this.map = null;
 
     var that = this;
     // Listen for browser/canvas resize events
@@ -91,7 +20,23 @@ module.exports = Game = function (canvasElement) {
         e.preventDefault();
     };
 
-    this.scene = this.createScene3();
+    
+    that.scene = that.createScene3();
+
+    // Socket io
+    var socket = io();
+    socket.on("time", function (timeString) {
+        console.log("Server time: " + timeString);
+    });
+
+    socket.on("load_map", function (map) {
+        console.log("Map recieved: " + map);
+        that.map = map;
+        that.loadMap(that.scene);
+    });
+
+    socket.emit("client_ready", new Date().toDateString());
+
 };
 
 Game.prototype.createScene1 = function () {
@@ -254,7 +199,16 @@ Game.prototype.createScene3 = function () {
     var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 0, Math.PI / 8, 150, new BABYLON.Vector3(60, -8, 100), scene);
     camera.attachControl(this.canvas, false);
 
-    var map = new Level().createDefaultMap();
+    
+
+    this.createUI(scene);
+
+    return scene;
+}
+
+Game.prototype.loadMap = function (scene) {
+    //var map = new Level().createDefaultMap();
+    var map = this.map;
 
     for (var region of map.regions) {
         for (var territory of region.territories) {
@@ -288,7 +242,7 @@ Game.prototype.createScene3 = function () {
                     polygon.material,
                     'emissiveColor',
                     new ColorHSL(region.fill_color.h, region.fill_color.s, region.fill_color.l).toColor3(),
-                    400
+                    100
                 )
             );
             polygon.actionManager.registerAction(
@@ -326,10 +280,6 @@ Game.prototype.createScene3 = function () {
         var dashedLines = BABYLON.MeshBuilder.CreateDashedLines(connection.id + "_connection", { points: points, dashSize: 1, dashNb: 10 }, scene);
         dashedLines.color = new ColorHSL(1, 1, 1).toColor3();
     }
-
-    this.createUI(scene);
-
-    return scene;
 }
 
 Game.prototype.createUI = function (scene) {
@@ -450,12 +400,8 @@ console.log("Game object created");
 game.run();
 console.log("Run started");
 
-// Socket io
-var socket = io();
-socket.on("time", function (timeString) {
-    console.log("Server time: " + timeString);
-});
-},{"./color_hsl.js":1,"./level.js":3}],3:[function(require,module,exports){
+
+},{"./level.js":2,"./util/api_client.js":3,"./util/color_hsl.js":4}],2:[function(require,module,exports){
 module.exports = Level = function () {
 
 };
@@ -1759,4 +1705,96 @@ Level.prototype.createDefaultMap = function () {
 
     return map;
 }
-},{}]},{},[2]);
+},{}],3:[function(require,module,exports){
+module.exports = ApiClient = function () {
+
+};
+
+ApiClient.prototype.getJsonAsync = function (url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.responseType = "json";
+    xhr.onload = function() {
+      var status = xhr.status;
+      if (status === 200) {
+        callback(xhr.response);
+      } else {
+        console.log("Status " + status + " fetching: " + url);
+      }
+    };
+    xhr.send();
+}
+},{}],4:[function(require,module,exports){
+module.exports = ColorHSL = function (h, s, l) {
+    this.h = h;
+    this.s = s;
+    this.l = l;
+};
+
+/**
+ * Converts an HSL color value to RGB. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * Assumes h, s, and l are contained in the set [0, 1] and
+ * returns r, g, and b in the set [0, 1].
+ *
+ * @param   {number}  h       The hue
+ * @param   {number}  s       The saturation
+ * @param   {number}  l       The lightness
+ * @return  {Color3}          The RGB representation
+ */
+ColorHSL.prototype.toColor3 = function () {
+    var r, g, b;
+
+    if (this.s == 0) {
+        r = g = b = this.l; // achromatic
+    }
+    else {
+        var hue2rgb = function hue2rgb(p, q, t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+        }
+
+        var q = this.l < 0.5 ? this.l * (1 + this.s) : this.l + this.s - this.l * this.s;
+        var p = 2 * this.l - q;
+        r = hue2rgb(p, q, this.h + 1 / 3);
+        g = hue2rgb(p, q, this.h);
+        b = hue2rgb(p, q, this.h - 1 / 3);
+    }
+    return new BABYLON.Color3(r, g, b);
+}
+
+/**
+ * Converts an RGB color value to HSL. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * Assumes r, g, and b are contained in the set [0, 1] and
+ * returns h, s, and l in the set [0, 1].
+ *
+ * @param   {number}  r       The red color value
+ * @param   {number}  g       The green color value
+ * @param   {number}  b       The blue color value
+ */
+ColorHSL.prototype.fromColor3 = function (r, g, b) {
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    this.h = (max + min) / 2;
+    this.s = (max + min) / 2;
+    this.l = (max + min) / 2;
+
+    if (max == min) {
+        this.h = this.s = 0; // achromatic
+    }
+    else {
+        var d = max - min;
+        this.s = this.l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: this.h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: this.h = (b - r) / d + 2; break;
+            case b: this.h = (r - g) / d + 4; break;
+        }
+        this.h /= 6;
+    }
+}
+},{}]},{},[1]);
