@@ -8,7 +8,8 @@
   "scripts": {
     "brow": "watch \"browserify src/client/game.js -o public/dist/app.js\" src/client",
     "server": "nodemon --watch src/server src/server/server.js",
-    "start": "concurrently -k -p \"[{name}]\" -n \"BROWSERIFY,NODEMON\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run brow\" \"npm run server\"",
+    "debug": "concurrently -k -p \"[{name}]\" -n \"BROWSERIFY,NODEMON\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run brow\" \"npm run server\"",
+    "start": "node src/server/server.js",
     "ugly": "uglifyjs --compress --mangle -o public/dist/app.js public/dist/app.js",
     "publish": "git push heroku master"
   },
