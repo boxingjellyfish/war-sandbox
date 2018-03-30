@@ -191,11 +191,13 @@ Game.prototype.createScene2 = function () {
 Game.prototype.createScene3 = function () {
     var scene = new BABYLON.Scene(this.engine);
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+    scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
+    scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
     var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), scene);
     camera.attachControl(this.canvas, false);
-    //this.createUI(scene);
+    this.createUI(scene);
     return scene;
-    
+
 }
 
 Game.prototype.loadMap = function () {
@@ -245,7 +247,6 @@ Game.prototype.loadMap = function () {
                 new BABYLON.ExecuteCodeAction(
                     BABYLON.ActionManager.OnPickTrigger,
                     function (evt) {
-                        console.log("execute action");
                         if (evt.meshUnderPointer) {
                             var meshClicked = evt.meshUnderPointer;
                             that.onTerrytoryClicked(meshClicked);
@@ -256,17 +257,17 @@ Game.prototype.loadMap = function () {
         }
     }
 
-    /*
+
     var discMaterial = new BABYLON.StandardMaterial("disc_material", this.scene)
     discMaterial.emissiveColor = new ColorHSL(0, 0, 0.7).toColor3();
     for (var connection of this.map.connections) {
         for (var point of connection.points) {
             var disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.5, arc: 1, tessellation: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
-            disc.position = new BABYLON.Vector3(point.x, point.y, 0);
+            disc.position = new BABYLON.Vector3(point.x, point.y, -0.1);
             disc.material = discMaterial;
         }
     }
-    */
+
 }
 
 Game.prototype.onTerrytoryClicked = function (meshClicked) {
@@ -317,7 +318,7 @@ Game.prototype.createUI = function (scene) {
     btnScene1.onPointerEnterObservable.add(function () {
         buttonHoverSound.play();
     });
-    advancedTexture.addControl(btnScene1);
+    //advancedTexture.addControl(btnScene1);
 
     var btnScene2 = BABYLON.GUI.Button.CreateSimpleButton("btnScene2", "S2");
     btnScene2.width = "100px";
@@ -340,7 +341,7 @@ Game.prototype.createUI = function (scene) {
     btnScene2.onPointerEnterObservable.add(function () {
         buttonHoverSound.play();
     });
-    advancedTexture.addControl(btnScene2);
+    //advancedTexture.addControl(btnScene2);
 
     var btnScene3 = BABYLON.GUI.Button.CreateSimpleButton("btnScene3", "S3");
     btnScene3.width = "100px";
@@ -363,7 +364,7 @@ Game.prototype.createUI = function (scene) {
     btnScene3.onPointerEnterObservable.add(function () {
         buttonHoverSound.play();
     });
-    advancedTexture.addControl(btnScene3);
+    //advancedTexture.addControl(btnScene3);
 
     var btnDebug = BABYLON.GUI.Button.CreateSimpleButton("btnDebug", "Debug");
     btnDebug.width = "100px";
