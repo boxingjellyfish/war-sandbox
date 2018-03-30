@@ -6,12 +6,24 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "node src/server/server.js"
+    "brow": "watch \"browserify src/client/game.js -o public/dist/app.js\" src/client",
+    "server": "nodemon --watch src/server src/server/server.js",
+    "debug": "concurrently -k -p \"[{name}]\" -n \"BROWSERIFY,NODEMON\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run brow\" \"npm run server\"",
+    "start": "node src/server/server.js",
+    "ugly": "uglifyjs --compress --mangle -o public/dist/app.js public/dist/app.js",
+    "publish": "git push heroku master"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "babylonjs": "3.1.1",
+    "babylonjs-gui": "3.1.1",
+    "browserify": "16.1.1",
+    "concurrently": "3.5.1",
     "express": "4.16.3",
-    "socket.io": "2.0.4"
+    "nodemon": "1.17.2",
+    "socket.io": "2.0.4",
+    "uglify-js-es6": "^2.8.9",
+    "watch": "1.0.2"
   }
 }
