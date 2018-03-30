@@ -237,15 +237,6 @@ Game.prototype.loadMap = function () {
                         evt.meshUnderPointer.material = that.getMaterialByName(evt.meshUnderPointer.name.replace("_polygon","_material"));
                     }
                 )
-                /*
-                new BABYLON.InterpolateValueAction(
-                    BABYLON.ActionManager.OnPointerOverTrigger,
-                    polygon.material,
-                    "lineColor",//'emissiveColor',
-                    new ColorHSL(region.color.h, region.color.s, 0.5).toColor3(),
-                    100
-                )
-                */
             );
             polygon.actionManager.registerAction(
                 new BABYLON.ExecuteCodeAction(
@@ -254,15 +245,6 @@ Game.prototype.loadMap = function () {
                         evt.meshUnderPointer.material = that.getMaterialByName(evt.meshUnderPointer.name.replace("_polygon","_grid_material"));
                     }
                 )
-                /*
-                new BABYLON.InterpolateValueAction(
-                    BABYLON.ActionManager.OnPointerOutTrigger,
-                    polygon.material,
-                    "lineColor",//'emissiveColor',
-                    new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3(),
-                    100
-                )
-                */
             );
             polygon.actionManager.registerAction(
                 new BABYLON.ExecuteCodeAction(
