@@ -194,7 +194,7 @@ Game.prototype.createScene3 = function () {
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
     var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), scene);
     camera.attachControl(this.canvas, false);
-    this.createUI(scene);
+    //this.createUI(scene);
     return scene;
 }
 
@@ -205,16 +205,19 @@ Game.prototype.loadMap = function () {
             var points = [];
             var shape = [];
             for (var border of territory.borders) {
-                points.push(new BABYLON.Vector3(border.x, border.y, 0))
-                shape.push(new BABYLON.Vector3(border.x, 0, border.y))
+                points.push(new BABYLON.Vector3(border.x, border.y, 0));
+                shape.push(new BABYLON.Vector3(border.x, 0, border.y));
             }
-            points.push(new BABYLON.Vector3(territory.borders[0].x, territory.borders[0].y, 0))
-            shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y))
+            points.push(new BABYLON.Vector3(territory.borders[0].x, territory.borders[0].y, 0));
+            shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y));
 
-            var polygonMaterial = new BABYLON.StandardMaterial(territory.id + "_material", this.scene)
+            var gridMaterial = new BABYLON.GridMaterial(territory.id + "_ground_material", this.scene);
+            gridMaterial.lineColor = new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3();
+            gridMaterial.majorUnitFrequency = 0;
+            var polygonMaterial = new BABYLON.StandardMaterial(territory.id + "_material", this.scene);
             polygonMaterial.emissiveColor = new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3();
             var polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "_polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
-            polygon.material = polygonMaterial;
+            polygon.material = gridMaterial; //polygonMaterial;
             polygon.rotate(BABYLON.Axis.X, -Math.PI / 2, BABYLON.Space.WORLD);
             var lines = BABYLON.MeshBuilder.CreateLines(territory.id + "_lines", { points: points, updatable: false, instance: null }, this.scene);
             lines.color = new ColorHSL(region.color.h, region.color.s, 0.5).toColor3();
@@ -224,7 +227,7 @@ Game.prototype.loadMap = function () {
                 new BABYLON.InterpolateValueAction(
                     BABYLON.ActionManager.OnPointerOverTrigger,
                     polygon.material,
-                    'emissiveColor',
+                    "lineColor",//'emissiveColor',
                     new ColorHSL(region.color.h, region.color.s, 0.5).toColor3(),
                     100
                 )
@@ -233,7 +236,7 @@ Game.prototype.loadMap = function () {
                 new BABYLON.InterpolateValueAction(
                     BABYLON.ActionManager.OnPointerOutTrigger,
                     polygon.material,
-                    'emissiveColor',
+                    "lineColor",//'emissiveColor',
                     new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3(),
                     100
                 )
@@ -253,6 +256,7 @@ Game.prototype.loadMap = function () {
         }
     }
 
+    /*
     var discMaterial = new BABYLON.StandardMaterial("disc_material", this.scene)
     discMaterial.emissiveColor = new ColorHSL(0, 0, 0.7).toColor3();
     for (var connection of this.map.connections) {
@@ -262,18 +266,21 @@ Game.prototype.loadMap = function () {
             disc.material = discMaterial;
         }
     }
+    */
 }
 
 Game.prototype.onTerrytoryClicked = function (meshClicked) {
     var id = meshClicked.name.replace("_polygon", "");
-    meshClicked.material.emissiveColor = new ColorHSL(0.6, 0.9, 0.3).toColor3();
+    //meshClicked.material.emissiveColor = new ColorHSL(0.6, 0.9, 0.3).toColor3();
+    meshClicked.material.lineColor = new ColorHSL(0.6, 0.9, 0.3).toColor3();
     for (var region of this.map.regions) {
         for (var territory of region.territories) {
             if (territory.id == id) {
                 if (territory.neighbours) {
                     for (var neighbour of territory.neighbours) {
                         var mesh = this.scene.getMeshByName(neighbour.id + "_polygon");
-                        mesh.material.emissiveColor = new ColorHSL(0, 0.9, 0.3).toColor3();
+                        //mesh.material.emissiveColor = new ColorHSL(0, 0.9, 0.3).toColor3();
+                        mesh.material.lineColor = new ColorHSL(0, 0.9, 0.3).toColor3();
                     }
                 }
             }
