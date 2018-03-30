@@ -6,6 +6,8 @@ module.exports = Game = function (canvasElement) {
     this.map = null;
     this.socket = io();
 
+    this.materials = [];
+
     var that = this;
     // Listen for browser/canvas resize events
     window.addEventListener("resize", function () {
@@ -16,7 +18,6 @@ module.exports = Game = function (canvasElement) {
     this.canvas.oncontextmenu = function (e) {
         e.preventDefault();
     };
-
 
     this.scene = this.createScene3();
 
@@ -197,7 +198,6 @@ Game.prototype.createScene3 = function () {
     camera.attachControl(this.canvas, false);
     this.createUI(scene);
     return scene;
-
 }
 
 Game.prototype.loadMap = function () {
@@ -213,11 +213,15 @@ Game.prototype.loadMap = function () {
             points.push(new BABYLON.Vector3(territory.borders[0].x, territory.borders[0].y, 0));
             shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y));
 
-            var gridMaterial = new BABYLON.GridMaterial(territory.id + "_ground_material", this.scene);
+            var gridMaterial = new BABYLON.GridMaterial(territory.id + "_grid_material", this.scene);
             gridMaterial.lineColor = new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3();
             gridMaterial.majorUnitFrequency = 0;
+            this.materials.push(gridMaterial);
+
             var polygonMaterial = new BABYLON.StandardMaterial(territory.id + "_material", this.scene);
             polygonMaterial.emissiveColor = new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3();
+            this.materials.push(polygonMaterial);
+
             var polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "_polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
             polygon.material = gridMaterial; //polygonMaterial;
             polygon.rotate(BABYLON.Axis.X, -Math.PI / 2, BABYLON.Space.WORLD);
@@ -226,6 +230,13 @@ Game.prototype.loadMap = function () {
 
             polygon.actionManager = new BABYLON.ActionManager(this.scene);
             polygon.actionManager.registerAction(
+                new BABYLON.ExecuteCodeAction(
+                    BABYLON.ActionManager.OnPointerOverTrigger,
+                    function (evt) {
+                        evt.meshUnderPointer.material = that.getMaterialByName(evt.meshUnderPointer.name.replace("_polygon","_material"));
+                    }
+                )
+                /*
                 new BABYLON.InterpolateValueAction(
                     BABYLON.ActionManager.OnPointerOverTrigger,
                     polygon.material,
@@ -233,8 +244,16 @@ Game.prototype.loadMap = function () {
                     new ColorHSL(region.color.h, region.color.s, 0.5).toColor3(),
                     100
                 )
+                */
             );
             polygon.actionManager.registerAction(
+                new BABYLON.ExecuteCodeAction(
+                    BABYLON.ActionManager.OnPointerOutTrigger,
+                    function (evt) {
+                        evt.meshUnderPointer.material = that.getMaterialByName(evt.meshUnderPointer.name.replace("_polygon","_grid_material"));
+                    }
+                )
+                /*
                 new BABYLON.InterpolateValueAction(
                     BABYLON.ActionManager.OnPointerOutTrigger,
                     polygon.material,
@@ -242,6 +261,7 @@ Game.prototype.loadMap = function () {
                     new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3(),
                     100
                 )
+                */
             );
             polygon.actionManager.registerAction(
                 new BABYLON.ExecuteCodeAction(
@@ -285,6 +305,14 @@ Game.prototype.onTerrytoryClicked = function (meshClicked) {
                     }
                 }
             }
+        }
+    }
+}
+
+Game.prototype.getMaterialByName = function (name) {
+    for (var material of this.materials) {
+        if (material.name == name) {
+            return material;
         }
     }
 }
