@@ -8,7 +8,9 @@
   "scripts": {
     "brow": "watch \"browserify src/client/game.js -o public/dist/app.js\" src/client",
     "server": "nodemon --watch src/server src/server/server.js",
-    "start": "concurrently -k -p \"[{name}]\" -n \"BROWSERIFY,NODEMON\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run brow\" \"npm run server\""
+    "start": "concurrently -k -p \"[{name}]\" -n \"BROWSERIFY,NODEMON\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run brow\" \"npm run server\"",
+    "ugly": "uglifyjs --compress --mangle -o public/dist/app.js public/dist/app.js",
+    "publish": "git push heroku master"
   },
   "author": "",
   "license": "ISC",
@@ -20,6 +22,7 @@
     "express": "4.16.3",
     "nodemon": "1.17.2",
     "socket.io": "2.0.4",
+    "uglify-js-es6": "^2.8.9",
     "watch": "1.0.2"
   }
 }

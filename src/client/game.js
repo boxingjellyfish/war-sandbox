@@ -195,6 +195,7 @@ Game.prototype.createScene3 = function () {
     camera.attachControl(this.canvas, false);
     //this.createUI(scene);
     return scene;
+    
 }
 
 Game.prototype.loadMap = function () {
