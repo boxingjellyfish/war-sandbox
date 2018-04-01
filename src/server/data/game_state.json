@@ -1,0 +1,26 @@
+{
+    "id": "game_id",
+    "players": [
+        {
+            "id": "player_id",
+            "name": "player_name",
+            "color": "red|blue|white|yellow|green|black",
+            "objective_id": "conquer_24",
+            "bombers": 5,
+            "territories": [
+                {
+                    "id": "alaska",
+                    "armies": 10
+                }
+            ],
+            "cards":[
+                {
+                    "type":"territory|region|number",
+                    "territory_id":"alaska",
+                    "region_id":"north_america",
+                    "value": 5
+                }
+            ]
+        }
+    ]
+}

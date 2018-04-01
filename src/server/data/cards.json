@@ -1,0 +1,389 @@
+{
+    "cards": [
+        {
+            "type": "territory",
+            "territory_id": "alaska",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "mackenzie",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "vancouver",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "ottawa",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "labrador",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "california",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "new_york",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "cuba",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "mexico",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "greenland",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "colombia_venezuela",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "peru_bolivia_chile",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "brazil",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "argentina_uruguay",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "argelia_nigeria",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "egypt",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "sudan",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "congo",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "south_africa",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "madagascar",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "omsk",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "aral",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "middle_east",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "dudinka",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "india",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "siberia",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "chita",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "mongolia",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "china",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "vietnam",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "vladivostok",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "japan",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "sweden",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "iceland",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "england",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "germany",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "france_spain_portugal_italy",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "poland_yugoslavia",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "moscow",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "australia",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "sumatra",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "borneo",
+            "owner": "deck"
+        },
+        {
+            "type": "territory",
+            "territory_id": "new_guinea",
+            "owner": "deck"
+        },
+        {
+            "type": "region",
+            "region_id": "north_america",
+            "owner": "deck"
+        },
+        {
+            "type": "region",
+            "region_id": "south_america",
+            "owner": "deck"
+        },
+        {
+            "type": "region",
+            "region_id": "africa",
+            "owner": "deck"
+        },
+        {
+            "type": "region",
+            "region_id": "asia",
+            "owner": "deck"
+        },
+        {
+            "type": "region",
+            "region_id": "europe",
+            "owner": "deck"
+        },
+        {
+            "type": "region",
+            "region_id": "oceania",
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 5,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 5,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 5,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 5,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 4,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 4,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 4,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 4,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 4,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 4,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 3,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 3,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 3,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 3,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 3,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 3,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 3,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 3,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 2,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 2,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 2,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 2,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 2,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 2,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 2,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 2,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 2,
+            "owner": "deck"
+        },
+        {
+            "type": "number",
+            "value": 2,
+            "owner": "deck"
+        }
+    ]
+}

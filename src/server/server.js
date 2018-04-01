@@ -16,7 +16,9 @@ const server = express()
 
 const io = socketIO(server);
 
-const map = JSON.parse(fs.readFileSync(path.join(__dirname,"data/map.json"), "utf8"));
+const map = JSON.parse(fs.readFileSync(path.join(__dirname, "data/map.json"), "utf8"));
+const objectives = JSON.parse(fs.readFileSync(path.join(__dirname, "data/objectives.json"), "utf8"));
+const cards = JSON.parse(fs.readFileSync(path.join(__dirname, "data/cards.json"), "utf8"));
 
 io.on("connection", (socket) => {
     console.log("Client connected");
