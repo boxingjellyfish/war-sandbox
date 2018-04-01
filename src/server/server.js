@@ -1,10 +1,14 @@
 "use strict";
 
+// Libs
 const express = require("express");
 const socketIO = require("socket.io");
 const path = require("path");
 const fs = require("fs");
 const util = require("util")
+
+// Local modules
+const Chat = require("./chat.js");
 
 const PORT = process.env.PORT || 3000;
 const INDEX = path.join(__dirname, "../../index.html");
@@ -19,14 +23,18 @@ const io = socketIO(server);
 const map = JSON.parse(fs.readFileSync(path.join(__dirname, "data/map.json"), "utf8"));
 const objectives = JSON.parse(fs.readFileSync(path.join(__dirname, "data/objectives.json"), "utf8"));
 const cards = JSON.parse(fs.readFileSync(path.join(__dirname, "data/cards.json"), "utf8"));
+const gameState = JSON.parse(fs.readFileSync(path.join(__dirname, "data/game_state.json"), "utf8"));
+
+const chat = new Chat(io);
 
 io.on("connection", (socket) => {
     console.log("Client connected");
     socket.on("disconnect", () => console.log("Client disconnected"));
     socket.on("client_ready", function (msg) {
-        console.log("client_ready" + msg);
+        console.log("client_ready: " + msg);
         socket.emit("load_map", map);
     });
+    chat.handleClient(socket);
 });
 
 setInterval(() => io.emit("time", new Date().toTimeString()), 1000);

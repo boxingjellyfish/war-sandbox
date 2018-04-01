@@ -22,13 +22,17 @@ module.exports = Game = function (canvasElement) {
     this.scene = this.createScene3();
 
     this.socket.on("time", function (timeString) {
-        console.log("Server time: " + timeString);
+        //console.log("Server time: " + timeString);
     });
 
     this.socket.on("load_map", function (map) {
         console.log("Map recieved: " + map);
         that.map = map;
         that.loadMap();
+    });
+
+    this.socket.on("chat_broadcast_message", function (msg) {
+        console.log("CHAT >> " + msg);
     });
 
     this.socket.emit("client_ready", new Date().toDateString());
@@ -79,7 +83,7 @@ Game.prototype.loadMap = function () {
                 new BABYLON.ExecuteCodeAction(
                     BABYLON.ActionManager.OnPointerOverTrigger,
                     function (evt) {
-                        evt.meshUnderPointer.material = that.getMaterialByName(evt.meshUnderPointer.name.replace("_polygon","_material"));
+                        evt.meshUnderPointer.material = that.getMaterialByName(evt.meshUnderPointer.name.replace("_polygon", "_material"));
                     }
                 )
             );
@@ -87,7 +91,7 @@ Game.prototype.loadMap = function () {
                 new BABYLON.ExecuteCodeAction(
                     BABYLON.ActionManager.OnPointerOutTrigger,
                     function (evt) {
-                        evt.meshUnderPointer.material = that.getMaterialByName(evt.meshUnderPointer.name.replace("_polygon","_grid_material"));
+                        evt.meshUnderPointer.material = that.getMaterialByName(evt.meshUnderPointer.name.replace("_polygon", "_grid_material"));
                     }
                 )
             );
@@ -134,6 +138,10 @@ Game.prototype.onTerrytoryClicked = function (meshClicked) {
                 }
             }
         }
+    }
+    this.socket.emit("chat_send_message", id);
+    if (id.startsWith("a")) {
+        this.socket.emit("chat_client_rename", "player_" + id);
     }
 }
 

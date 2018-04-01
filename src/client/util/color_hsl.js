@@ -1,8 +1,8 @@
-module.exports = ColorHSL = function (h, s, l) {
+function ColorHSL(h, s, l) {
     this.h = h;
     this.s = s;
     this.l = l;
-};
+}
 
 /**
  * Converts an HSL color value to RGB. Conversion formula
@@ -70,3 +70,5 @@ ColorHSL.prototype.fromColor3 = function (r, g, b) {
         this.h /= 6;
     }
 }
+
+module.exports = ColorHSL;
