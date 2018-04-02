@@ -1,9 +1,21 @@
 # war-sandbox
 
-http://www.gametrack.com.br/jogos/war2/instrucoes/tabelas.asp
+## ToDo
+- splash screen
+- chat ui
+- join match with code
+- server game logic
+- dice roll & comparison
+- gameplay ui
+- finish dotted connections
+- show territory names
+- display generic card
 
-https://boardgamegeek.com/image/186117/war-ii
+## Roadmap
+- v1: multiplayer only
+- v2: computer opponent
+- v3: random maps
 
-v1: multiplayer only
-v2: computer opponent
-v3: random maps
+## Sources
+- http://www.gametrack.com.br/jogos/war2/instrucoes/tabelas.asp
+- https://boardgamegeek.com/image/186117/war-ii
