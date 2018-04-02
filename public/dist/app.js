@@ -1,15 +1,17 @@
 (function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 var ColorHSL = require("./util/color_hsl.js");
+var Menu = require("./menu.js");
+var Match = require("./match.js");
 
-module.exports = Game = function (canvasElement) {
+function Game(canvasElement) {
     this.canvas = document.getElementById(canvasElement);
     this.engine = new BABYLON.Engine(this.canvas, true);
-    this.map = null;
     this.socket = io();
-
-    this.materials = [];
+    this.menu = new Menu(this.canvas, this.engine, this.socket, this);
+    this.match = new Match(this.canvas, this.engine, this.socket);
 
     var that = this;
+
     // Listen for browser/canvas resize events
     window.addEventListener("resize", function () {
         that.engine.resize();
@@ -20,12 +22,44 @@ module.exports = Game = function (canvasElement) {
         e.preventDefault();
     };
 
-    this.scene = this.createScene3();
+    this.scene = this.menu.createMainMenuScene();
+};
 
-    this.socket.on("time", function (timeString) {
-        //console.log("Server time: " + timeString);
+// run the render loop
+Game.prototype.run = function () {
+    var that = this;
+    this.engine.runRenderLoop(function () {
+        that.scene.render();
     });
+}
 
+Game.prototype.newGameAction = function () {    
+    this.scene.dispose();
+    this.scene = this.match.createMatchScene();
+}
+
+module.exports = Game;
+
+// Create the game using the "renderCanvas"
+var game = new Game("renderCanvas");
+
+// start animation
+game.run();
+
+},{"./match.js":2,"./menu.js":3,"./util/color_hsl.js":4}],2:[function(require,module,exports){
+var ColorHSL = require("./util/color_hsl.js");
+
+function Match(canvas, engine, socket) {
+    this.canvas = canvas;
+    this.engine = engine;
+    this.socket = socket;
+    this.scene = null;
+    this.camera = null;
+
+    this.materials = [];    
+    this.map = null;
+
+    var that = this;
     this.socket.on("load_map", function (map) {
         console.log("Map recieved: " + map);
         that.map = map;
@@ -36,22 +70,24 @@ module.exports = Game = function (canvasElement) {
         console.log("CHAT >> " + msg);
     });
 
-    this.socket.emit("client_ready", new Date().toDateString());
-
-};
-
-Game.prototype.createScene3 = function () {
-    var scene = new BABYLON.Scene(this.engine);
-    scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-    scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
-    scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
-    var camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), scene);
-    camera.attachControl(this.canvas, false);
-    this.createUI(scene);
-    return scene;
 }
 
-Game.prototype.loadMap = function () {
+Match.prototype.createMatchScene = function () {
+    this.scene = new BABYLON.Scene(this.engine);
+    this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+    this.scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
+    this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
+    
+    this.camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), this.scene);
+    this.camera.attachControl(this.canvas, false);
+    
+    this.createUI(this.scene);    
+    
+    this.socket.emit("client_ready");
+    return this.scene;
+}
+
+Match.prototype.loadMap = function () {
     var that = this;
     for (var region of this.map.regions) {
         for (var territory of region.territories) {
@@ -123,7 +159,7 @@ Game.prototype.loadMap = function () {
 
 }
 
-Game.prototype.onTerrytoryClicked = function (meshClicked) {
+Match.prototype.onTerrytoryClicked = function (meshClicked) {
     var id = meshClicked.name.replace("_polygon", "");
     //meshClicked.material.emissiveColor = new ColorHSL(0.6, 0.9, 0.3).toColor3();
     meshClicked.material.lineColor = new ColorHSL(0.6, 0.9, 0.3).toColor3();
@@ -146,7 +182,7 @@ Game.prototype.onTerrytoryClicked = function (meshClicked) {
     }
 }
 
-Game.prototype.getMaterialByName = function (name) {
+Match.prototype.getMaterialByName = function (name) {
     for (var material of this.materials) {
         if (material.name == name) {
             return material;
@@ -154,7 +190,7 @@ Game.prototype.getMaterialByName = function (name) {
     }
 }
 
-Game.prototype.createUI = function (scene) {
+Match.prototype.createUI = function (scene) {
     var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
     var buttonHoverSound = new BABYLON.Sound("buttonHoverSound", "audio/beep-29.wav", scene);
@@ -187,24 +223,131 @@ Game.prototype.createUI = function (scene) {
     advancedTexture.addControl(btnDebug);
 }
 
-Game.prototype.run = function () {
-    // run the render loop
+module.exports = Match;
+},{"./util/color_hsl.js":4}],3:[function(require,module,exports){
+var ColorHSL = require("./util/color_hsl.js");
+
+function Menu(canvas, engine, socket, actionsHandler) {
+    this.canvas = canvas;
+    this.engine = engine;
+    this.socket = socket;
+    this.actionsHandler = actionsHandler;
+    this.scene = null;
+    this.camera = null;
+    this.advancedTexture = null;
+    this.menuMusic = null;
+    this.buttonHoverSound = null;
+    this.buttonClickSound = null;
+    this.gameTitle = null;
+    this.newGame = null;
+}
+
+Menu.prototype.createMainMenuScene = function () {
+    this.scene = new BABYLON.Scene(this.engine);
+    this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+    this.scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
+    this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
+
+    this.camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), this.scene);
+    this.camera.attachControl(this.canvas, false);
+
+    this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+    this.menuMusic = new BABYLON.Sound("buttonHoverSound", "audio/menu.mp3", this.scene, null, { autoplay: true, loop: true });
+    this.buttonHoverSound = new BABYLON.Sound("buttonHoverSound", "audio/beep-29.wav", this.scene);
+    this.buttonClickSound = new BABYLON.Sound("buttonClickSound", "audio/button-35.wav", this.scene);
+
+    this.createNewGameButton();
+    this.createTitle();
+
+    return this.scene;
+}
+
+Menu.prototype.createTitle = function () {
+    this.gameTitle = new BABYLON.GUI.TextBlock();
+    this.gameTitle.width = "200px";
+    this.gameTitle.height = "40px";
+    this.gameTitle.text = "WAR II";
+    this.gameTitle.fontFamily = "Share Tech Mono";
+    this.gameTitle.color = new ColorHSL(0.3, 0.9, 0.7).toRGBString();
+    this.gameTitle.alpha = 0.0;
+    this.gameTitle.fontSize = 48;
+    this.advancedTexture.addControl(this.gameTitle);
+
+    var titleAnimationKeys = [];
+    titleAnimationKeys.push({
+        frame: 0,
+        value: 0.0
+    });
+    titleAnimationKeys.push({
+        frame: 60,
+        value: 1.0
+    });
+
+    var titleAnimation = new BABYLON.Animation("titleAnimation", "alpha", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT);
+    titleAnimation.setKeys(titleAnimationKeys);
+
+    var titleEasingFunction = new BABYLON.QuadraticEase();
+    titleEasingFunction.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+    titleAnimation.setEasingFunction(titleEasingFunction)
+
+    this.gameTitle.animations = [];
+    this.gameTitle.animations.push(titleAnimation);
+
     var that = this;
-    this.engine.runRenderLoop(function () {
-        that.scene.render();
+    this.scene.beginAnimation(this.gameTitle, 0, 60, false, 1, function () {
+        that.scene.beginAnimation(that.newGame, 0, 60, false);
     });
 }
 
-// Create the game using the "renderCanvas"
-var game = new Game("renderCanvas");
-console.log("Game object created");
+Menu.prototype.createNewGameButton = function () {
+    this.newGame = new BABYLON.GUI.TextBlock();
+    this.newGame.text =  "Start";
+    this.newGame.width = "100px";
+    this.newGame.height = "40px";
+    this.newGame.fontFamily = "Share Tech Mono";
+    this.newGame.color = new ColorHSL(0.3, 0.9, 0.7).toRGBString();
+    this.newGame.alpha = 0.0;
+    this.newGame.fontSize = 18;
+    this.newGame.top = "75px";
 
-// start animation
-game.run();
-console.log("Run started");
+    var newGameAnimationKeys = [];
+    newGameAnimationKeys.push({
+        frame: 0,
+        value: 0.0
+    });
+    newGameAnimationKeys.push({
+        frame: 60,
+        value: 1.0
+    });
 
+    var newGameAnimation = new BABYLON.Animation("newGameAnimation", "alpha", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT);
+    newGameAnimation.setKeys(newGameAnimationKeys);
 
-},{"./util/color_hsl.js":2}],2:[function(require,module,exports){
+    var newGameEasingFunction = new BABYLON.QuadraticEase();
+    newGameEasingFunction.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+    newGameAnimation.setEasingFunction(newGameEasingFunction)
+
+    this.newGame.animations = [];
+    this.newGame.animations.push(newGameAnimation);
+    
+    var that = this;
+    this.newGame.onPointerEnterObservable.add(function () {
+        that.buttonHoverSound.play();
+    });
+    this.newGame.onPointerUpObservable.add(function () {
+        that.menuMusic.pause();
+        that.buttonClickSound.play();
+        window.setTimeout(function () {
+            that.actionsHandler.newGameAction();
+        }, 200);
+    });
+
+    this.advancedTexture.addControl(this.newGame);
+}
+
+module.exports = Menu;
+},{"./util/color_hsl.js":4}],4:[function(require,module,exports){
 function ColorHSL(h, s, l) {
     this.h = h;
     this.s = s;
@@ -276,6 +419,14 @@ ColorHSL.prototype.fromColor3 = function (r, g, b) {
         }
         this.h /= 6;
     }
+}
+
+ColorHSL.prototype.toRGBString = function () {
+    var color3 = this.toColor3();
+    var r = Math.floor(color3.r * 255);
+    var g = Math.floor(color3.g * 255);
+    var b = Math.floor(color3.b * 255);
+    return "rgb(" + r + "," + g + "," + b + ")";
 }
 
 module.exports = ColorHSL;

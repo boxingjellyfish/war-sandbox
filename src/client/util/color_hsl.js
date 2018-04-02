@@ -71,4 +71,12 @@ ColorHSL.prototype.fromColor3 = function (r, g, b) {
     }
 }
 
+ColorHSL.prototype.toRGBString = function () {
+    var color3 = this.toColor3();
+    var r = Math.floor(color3.r * 255);
+    var g = Math.floor(color3.g * 255);
+    var b = Math.floor(color3.b * 255);
+    return "rgb(" + r + "," + g + "," + b + ")";
+}
+
 module.exports = ColorHSL;

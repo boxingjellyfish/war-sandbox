@@ -16,7 +16,7 @@ const INDEX = path.join(__dirname, "../../index.html");
 const server = express()
     .use(express.static("public"))
     .use((req, res) => res.sendFile(INDEX))
-    .listen(PORT, () => console.log(`Listening on ${PORT}`));
+    .listen(PORT, () => console.log("Listening on " + PORT));
 
 const io = socketIO(server);
 
@@ -36,5 +36,3 @@ io.on("connection", (socket) => {
     });
     chat.handleClient(socket);
 });
-
-setInterval(() => io.emit("time", new Date().toTimeString()), 1000);
