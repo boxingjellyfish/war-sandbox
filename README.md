@@ -3,6 +3,7 @@
 ## ToDo
 - splash screen
 - chat ui
+- player display (planes, cards, territories, total troops)
 - join match with code
 - server game logic
 - dice roll & comparison
@@ -10,6 +11,8 @@
 - finish dotted connections
 - show territory names
 - display generic card
+- zoom camera to attack
+- display troops number
 
 ## Roadmap
 - v1: multiplayer only
