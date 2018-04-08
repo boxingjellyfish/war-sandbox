@@ -28,16 +28,16 @@ class Match {
         this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
         this.scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
         this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
-    
+
         this.camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), this.scene);
         this.camera.attachControl(this.canvas, false);
-    
+
         this.createUI(this.scene);
-    
+
         this.socket.emit("client_ready");
         return this.scene;
     }
-    
+
     loadMap() {
         for (let region of this.map.regions) {
             for (let territory of region.territories) {
@@ -49,22 +49,28 @@ class Match {
                 }
                 points.push(new BABYLON.Vector3(territory.borders[0].x, territory.borders[0].y, 0));
                 shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y));
-    
+
+                //let regionColor = new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3();
+                //let regionColorHighlight = new ColorHSL(region.color.h, region.color.s, region.color.l + 0.2).toColor3();
+
+                let regionColor = new ColorHSL(0, 0, 0.3).toColor3();
+                let regionColorHighlight = new ColorHSL(0, 0, 0.5).toColor3();
+
                 let gridMaterial = new BABYLON.GridMaterial(territory.id + "_grid_material", this.scene);
-                gridMaterial.lineColor = new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3();
+                gridMaterial.lineColor = regionColor;
                 gridMaterial.majorUnitFrequency = 0;
                 this.materials.push(gridMaterial);
-    
+
                 let polygonMaterial = new BABYLON.StandardMaterial(territory.id + "_material", this.scene);
-                polygonMaterial.emissiveColor = new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3();
+                polygonMaterial.emissiveColor = regionColor;
                 this.materials.push(polygonMaterial);
-    
+
                 let polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "_polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
                 polygon.material = gridMaterial; //polygonMaterial;
                 polygon.rotate(BABYLON.Axis.X, -Math.PI / 2, BABYLON.Space.WORLD);
                 let lines = BABYLON.MeshBuilder.CreateLines(territory.id + "_lines", { points: points, updatable: false, instance: null }, this.scene);
-                lines.color = new ColorHSL(region.color.h, region.color.s, 0.5).toColor3();
-    
+                lines.color = regionColorHighlight;
+
                 polygon.actionManager = new BABYLON.ActionManager(this.scene);
                 polygon.actionManager.registerAction(
                     new BABYLON.ExecuteCodeAction(
@@ -95,24 +101,42 @@ class Match {
                 );
             }
         }
-    
-    
+
+        this.drawConnections();
+
+    }
+
+    drawConnections() {
+        let pointZ = -0.1;
         let discMaterial = new BABYLON.StandardMaterial("disc_material", this.scene)
         discMaterial.emissiveColor = new ColorHSL(0, 0, 0.7).toColor3();
         for (let connection of this.map.connections) {
-            for (let point of connection.points) {
-                let disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.4, arc: 1, tessellation: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
-                disc.position = new BABYLON.Vector3(point.x, point.y, -0.1);
+            for (let i = 1; i < connection.points.length; i++) {
+                let from = connection.points[i - 1];
+                let to = connection.points[i];
+                let pointFrom = new BABYLON.Vector3(from.x, from.y, pointZ);
+                let pointTo = new BABYLON.Vector3(to.x, to.y, pointZ);
+                let norm = pointTo.subtract(pointFrom).normalize();
+                let next = pointFrom.add(norm);
+                let disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, arc: 1, tessellation: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
+                disc.position = new BABYLON.Vector3(next.x, next.y, next.z);
                 disc.material = discMaterial;
+                let diff = pointTo.subtract(next).length();
+                while (diff > norm.length()) {
+                    next = next.add(norm);
+                    disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, arc: 1, tessellation: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
+                    disc.position = next.clone();
+                    disc.material = discMaterial;
+                    diff = pointTo.subtract(next).length();
+                }
             }
         }
-    
     }
-    
+
     onTerrytoryClicked(meshClicked) {
         let id = meshClicked.name.replace("_polygon", "");
         //meshClicked.material.emissiveColor = new ColorHSL(0.6, 0.9, 0.3).toColor3();
-        meshClicked.material.lineColor = new ColorHSL(0.6, 0.9, 0.3).toColor3();
+        meshClicked.material.lineColor = new ColorHSL(0, 0, 0.5).toColor3();
         for (let region of this.map.regions) {
             for (let territory of region.territories) {
                 if (territory.id == id) {
@@ -120,7 +144,7 @@ class Match {
                         for (let neighbour of territory.neighbours) {
                             let mesh = this.scene.getMeshByName(neighbour.id + "_polygon");
                             //mesh.material.emissiveColor = new ColorHSL(0, 0.9, 0.3).toColor3();
-                            mesh.material.lineColor = new ColorHSL(0, 0.9, 0.3).toColor3();
+                            mesh.material.lineColor = new ColorHSL(0, 0, 0.7).toColor3();
                         }
                     }
                 }
@@ -131,7 +155,7 @@ class Match {
             this.socket.emit("chat_client_rename", "player_" + id);
         }
     }
-    
+
     getMaterialByName(name) {
         for (let material of this.materials) {
             if (material.name == name) {
@@ -139,13 +163,13 @@ class Match {
             }
         }
     }
-    
+
     createUI(scene) {
         let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-    
+
         let buttonHoverSound = new BABYLON.Sound("buttonHoverSound", "audio/beep-29.wav", scene);
         let buttonClickSound = new BABYLON.Sound("buttonClickSound", "audio/button-35.wav", scene);
-        
+
         let btnDebug = BABYLON.GUI.Button.CreateSimpleButton("btnDebug", "Debug");
         btnDebug.width = "100px";
         btnDebug.height = "40px";
