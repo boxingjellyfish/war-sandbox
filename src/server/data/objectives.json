@@ -1,0 +1,84 @@
+{
+    "objectives":[
+        {
+            "id":"conquer_north_america_africa",
+            "description":"Conquer North America and Africa"
+        },
+        {
+            "id":"conquer_asia_africa",
+            "description":"Conquer Asia and Africa"
+        },
+        {
+            "id":"conquer_north_america_oceania",
+            "description":"Conquer North America and Oceania"
+        },
+        {
+            "id":"conquer_asia_europe_africa",
+            "description":"Conquer Asia and Majority of Europe and Africa"
+        },
+        {
+            "id":"conquer_asia_south_america",
+            "description":"Conquer Asia and South America"
+        },
+        {
+            "id":"conquer_europe_oceania_third",
+            "description":"Conquer Europe, Oceania and Any Other Continent"
+        },
+        {
+            "id":"armies_middle_east",
+            "description":"Gather 50 Armies in Middle East"
+        },
+        {
+            "id":"conquer_24",
+            "description":"Conquer 24 territories"
+        },
+        {
+            "id":"conquer_strategic_centers_8",
+            "description":"Conquer 8 Strategic Centers"
+        },
+        {
+            "id":"conquer_europe_asia_north_america",
+            "description":"Conquer Majority of Europe, Asia and North America"
+        },
+        {
+            "id":"conquer_south_america_europe_germany",
+            "description":"Conquer South America, Europe and Gather 20 Armies in Germany"
+        },
+        {
+            "id":"conquer_majority_4",
+            "description":"Conquer Majority of 4 Continents"
+        },
+        {
+            "id":"conquer_strategic_centers_5",
+            "description":"Conquer 5 Strategic Centers with 10 Armies each"
+        },
+        {
+            "id":"armies_new_york_japan",
+            "description":"Gather 20 Armies in New York and Japan"
+        },
+        {
+            "id":"destroy_blue",
+            "description":"Destroy Blue Army"
+        },
+        {
+            "id":"destroy_red",
+            "description":"Destroy Red Army"
+        },
+        {
+            "id":"destroy_white",
+            "description":"Destroy White Army"
+        },
+        {
+            "id":"destroy_yellow",
+            "description":"Destroy Yellow Army"
+        },
+        {
+            "id":"destroy_green",
+            "description":"Destroy Green Army"
+        },
+        {
+            "id":"destroy_black",
+            "description":"Destroy Black Army"
+        }
+    ]
+}

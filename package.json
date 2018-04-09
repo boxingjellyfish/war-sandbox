@@ -4,7 +4,7 @@
   "engines": {
     "node": "9.8.0"
   },
-  "main": "index.js",
+  "main": "src/server/server.js",
   "scripts": {
     "brow": "watch \"browserify src/client/game.js -o public/dist/app.js\" src/client",
     "server": "nodemon --watch src/server src/server/server.js",
@@ -23,7 +23,7 @@
     "express": "4.16.3",
     "nodemon": "1.17.2",
     "socket.io": "2.0.4",
-    "uglify-js-es6": "^2.8.9",
+    "uglify-js-es6": "2.8.9",
     "watch": "1.0.2"
   }
 }
