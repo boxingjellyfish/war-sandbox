@@ -68,6 +68,8 @@ class Match {
         this.scene = null;
         this.camera = null;
 
+        this.hoverText = null;
+
         this.materials = [];
         this.map = null;
 
@@ -89,7 +91,7 @@ class Match {
         this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
 
         this.camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), this.scene);
-        this.camera.attachControl(this.canvas, false);
+        //this.camera.attachControl(this.canvas, false);
 
         this.createUI(this.scene);
 
@@ -136,6 +138,8 @@ class Match {
                         BABYLON.ActionManager.OnPointerOverTrigger,
                         (evt) => {
                             evt.meshUnderPointer.material = this.getMaterialByName(evt.meshUnderPointer.name.replace("_polygon", "_material"));
+                            this.hoverText.text = evt.meshUnderPointer.name.replace("_polygon", "");
+                            this.hoverText.alpha = 1;
                         }
                     )
                 );
@@ -144,6 +148,8 @@ class Match {
                         BABYLON.ActionManager.OnPointerOutTrigger,
                         (evt) => {
                             evt.meshUnderPointer.material = this.getMaterialByName(evt.meshUnderPointer.name.replace("_polygon", "_grid_material"));
+                            this.hoverText.alpha = 0;
+                            this.hoverText.text = "";
                         }
                     )
                 );
@@ -255,6 +261,25 @@ class Match {
             buttonHoverSound.play();
         });
         advancedTexture.addControl(btnDebug);
+
+        this.hoverText = new BABYLON.GUI.TextBlock();
+        this.hoverText.width = "400px";
+        this.hoverText.height = "40px";
+        this.hoverText.text = "";
+        this.hoverText.fontFamily = "Share Tech Mono";
+        this.hoverText.color = new ColorHSL(0, 0, 0.7).toRGBString();
+        this.hoverText.alpha = 0.0;
+        this.hoverText.fontSize = 14;
+        this.hoverText.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        this.hoverText.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        this.hoverText.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        this.hoverText.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        advancedTexture.addControl(this.hoverText);
+
+        window.addEventListener("mousemove", () => {
+            this.hoverText.left = this.scene.pointerX + 20;
+            this.hoverText.top = this.scene.pointerY + 20;
+        });
     }
 }
 

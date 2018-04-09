@@ -28,8 +28,8 @@ const chat = new Chat(io);
 io.on("connection", (socket) => {
     console.log("Client connected");
     socket.on("disconnect", () => console.log("Client disconnected"));
-    socket.on("client_ready", (msg) => {
-        console.log("client_ready: " + msg);
+    socket.on("client_ready", () => {
+        console.log("client_ready: " + socket.id);
         socket.emit("load_map", map);
     });
     chat.handleClient(socket);
