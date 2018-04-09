@@ -15,7 +15,6 @@ class Match {
         this.map = null;
 
         this.socket.on("load_map", (map) => {
-            console.log("Map recieved: " + map);
             this.map = map;
             this.loadMap();
         });
@@ -44,7 +43,9 @@ class Match {
         this.camera.upperAlphaLimit = alphaCenter + 0.5;
         this.camera.lowerBetaLimit = betaCenter - 0.5;
         this.camera.upperBetaLimit = betaCenter + 0.5;
-        console.log(this.camera.inputs.attached);
+
+        this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
+        this.camera.inputs.remove(this.camera.inputs.attached.pointers);
 
         this.createUI(this.scene);
 
@@ -213,7 +214,7 @@ class Match {
         btnDebug.onPointerEnterObservable.add(() => {
             buttonHoverSound.play();
         });
-        advancedTexture.addControl(btnDebug);
+        //advancedTexture.addControl(btnDebug);
 
         this.hoverText = new BABYLON.GUI.TextBlock();
         this.hoverText.width = "400px";
@@ -233,6 +234,19 @@ class Match {
             this.hoverText.left = this.scene.pointerX + 20;
             this.hoverText.top = this.scene.pointerY + 20;
         });
+
+        /*
+        this.scene.actionManager = new BABYLON.ActionManager(scene);
+        this.scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
+            if (evt.sourceEvent.key == "d") {
+                if (this.scene.debugLayer.isVisible()) {
+                    this.scene.debugLayer.hide();
+                } else {
+                    this.scene.debugLayer.show();
+                }
+            }
+        }));
+        */
     }
 }
 

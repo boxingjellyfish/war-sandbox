@@ -17,16 +17,29 @@ class Game {
         });
 
         // Disable right click
-        this.canvas.oncontextmenu = function (e) {
+        this.canvas.oncontextmenu = (e) => {
             e.preventDefault();
         };
 
+        // Fullscreen F key
+        document.addEventListener("keydown", (e) => {
+            if (e.code == "KeyF") {
+                this.toggleFullScreen();
+            }
+        }, false);
+
+        // Debug console D key
+        document.addEventListener("keydown", (e) => {
+            if (e.code == "KeyD") {
+                this.toggleDebugLayer();
+            }
+        }, false);
+
+        // Load scene from parameter
         let url = new URL(window.location.href);
         var scene = url.searchParams.get("scene");
-        if (scene) {
-            console.log("Load scene: " + scene);
-            if (scene == "match")
-                this.scene = this.match.createMatchScene();
+        if (scene && scene == "match") {
+            this.scene = this.match.createMatchScene();
         }
         else {
             this.scene = this.menu.createMainMenuScene();
@@ -44,8 +57,38 @@ class Game {
         this.scene.dispose();
         this.scene = this.match.createMatchScene();
     }
-}
 
+    // Fullscreen cross browser support
+    toggleFullScreen() {
+        if (!document.fullscreenElement &&    // alternative standard method
+            !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) {
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+            }
+        } else {
+            if (document.cancelFullScreen) {
+                document.cancelFullScreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitCancelFullScreen) {
+                document.webkitCancelFullScreen();
+            }
+        }
+    }
+    
+    // Debug layer
+    toggleDebugLayer() {
+        if (this.scene.debugLayer.isVisible()) {
+            this.scene.debugLayer.hide();
+        } else {
+            this.scene.debugLayer.show();
+        }
+    }
+}
 
 module.exports = Game;
 
