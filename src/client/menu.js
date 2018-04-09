@@ -24,8 +24,9 @@ class Menu {
         this.scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
         this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
 
-        this.camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), this.scene);
+        this.camera = new BABYLON.ArcRotateCamera("mainMenuCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), this.scene);
         this.camera.attachControl(this.canvas, false);
+        this.scene.activeCamera = this.camera;
 
         this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 

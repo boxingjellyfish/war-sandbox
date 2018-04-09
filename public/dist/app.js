@@ -1,5 +1,5 @@
 (function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
-const ColorHSL = require("./util/color_hsl.js");
+const Splash = require("./splash.js");
 const Menu = require("./menu.js");
 const Match = require("./match.js");
 
@@ -9,6 +9,7 @@ class Game {
         this.canvas = document.getElementById(canvasElement);
         this.engine = new BABYLON.Engine(this.canvas, true);
         this.socket = io();
+        this.splash = new Splash(this.canvas, this.engine, this.socket, this);
         this.menu = new Menu(this.canvas, this.engine, this.socket, this);
         this.match = new Match(this.canvas, this.engine, this.socket);
 
@@ -42,8 +43,11 @@ class Game {
         if (scene && scene == "match") {
             this.scene = this.match.createMatchScene();
         }
-        else {
+        else if (scene && scene == "menu") {
             this.scene = this.menu.createMainMenuScene();
+        }
+        else {
+            this.scene = this.splash.createSplashScene();
         }
     }
 
@@ -52,6 +56,11 @@ class Game {
         this.engine.runRenderLoop(() => {
             this.scene.render();
         });
+    }
+
+    menuAction() {
+        this.scene.dispose();
+        this.scene = this.menu.createMainMenuScene();
     }
 
     newGameAction() {
@@ -80,7 +89,7 @@ class Game {
             }
         }
     }
-    
+
     // Debug layer
     toggleDebugLayer() {
         if (this.scene.debugLayer.isVisible()) {
@@ -99,7 +108,7 @@ const game = new Game("renderCanvas");
 // start animation
 game.run();
 
-},{"./match.js":2,"./menu.js":3,"./util/color_hsl.js":4}],2:[function(require,module,exports){
+},{"./match.js":2,"./menu.js":3,"./splash.js":4}],2:[function(require,module,exports){
 const ColorHSL = require("./util/color_hsl.js");
 
 class Match {
@@ -110,7 +119,7 @@ class Match {
         this.socket = socket;
         this.scene = null;
         this.camera = null;
-
+        this.advancedTexture = null;
         this.hoverText = null;
 
         this.materials = [];
@@ -137,7 +146,7 @@ class Match {
         let defaultZoom = 150;
         let mapCenter = new BABYLON.Vector3(110, 50, 0);
 
-        this.camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", alphaCenter, betaCenter + 0.5, defaultZoom, mapCenter, this.scene);
+        this.camera = new BABYLON.ArcRotateCamera("matchCamera", alphaCenter, betaCenter + 0.5, defaultZoom, mapCenter, this.scene);
         this.camera.attachControl(this.canvas, false);
         this.camera.lowerRadiusLimit = 50;
         this.camera.upperRadiusLimit = 300;
@@ -289,7 +298,7 @@ class Match {
     }
 
     createUI(scene) {
-        let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+        this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
         let buttonHoverSound = new BABYLON.Sound("buttonHoverSound", "audio/beep-29.wav", scene);
         let buttonClickSound = new BABYLON.Sound("buttonClickSound", "audio/button-35.wav", scene);
@@ -316,7 +325,7 @@ class Match {
         btnDebug.onPointerEnterObservable.add(() => {
             buttonHoverSound.play();
         });
-        //advancedTexture.addControl(btnDebug);
+        //this.advancedTexture.addControl(btnDebug);
 
         this.hoverText = new BABYLON.GUI.TextBlock();
         this.hoverText.width = "400px";
@@ -330,7 +339,7 @@ class Match {
         this.hoverText.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.hoverText.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         this.hoverText.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-        advancedTexture.addControl(this.hoverText);
+        this.advancedTexture.addControl(this.hoverText);
 
         window.addEventListener("mousemove", () => {
             this.hoverText.left = this.scene.pointerX + 20;
@@ -353,7 +362,7 @@ class Match {
 }
 
 module.exports = Match;
-},{"./util/color_hsl.js":4}],3:[function(require,module,exports){
+},{"./util/color_hsl.js":5}],3:[function(require,module,exports){
 const ColorHSL = require("./util/color_hsl.js");
 
 class Menu {
@@ -380,8 +389,9 @@ class Menu {
         this.scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
         this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
 
-        this.camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), this.scene);
+        this.camera = new BABYLON.ArcRotateCamera("mainMenuCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), this.scene);
         this.camera.attachControl(this.canvas, false);
+        this.scene.activeCamera = this.camera;
 
         this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
@@ -538,7 +548,84 @@ class Menu {
 }
 
 module.exports = Menu;
-},{"./util/color_hsl.js":4}],4:[function(require,module,exports){
+},{"./util/color_hsl.js":5}],4:[function(require,module,exports){
+const ColorHSL = require("./util/color_hsl.js");
+
+class Splash {
+
+    constructor(canvas, engine, socket, actionsHandler) {
+        this.canvas = canvas;
+        this.engine = engine;
+        this.socket = socket;
+        this.actionsHandler = actionsHandler;
+        this.scene = null;
+        this.camera = null;
+        this.advancedTexture = null;
+        this.splashSound = null;
+        this.txtSplash = null;
+        this.imgLogo = null;
+    }
+
+    createSplashScene() {
+        this.scene = new BABYLON.Scene(this.engine);
+        this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+        this.scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
+        this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
+
+        this.camera = new BABYLON.ArcRotateCamera("splashCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), this.scene);
+        this.camera.attachControl(this.canvas, false);
+        this.scene.activeCamera = this.camera;
+
+        this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+        this.splashSound = new BABYLON.Sound("splashSound", "audio/intro.mp3", this.scene, null, { autoplay: true });
+        this.imgLogo = new BABYLON.GUI.Image("imgLogo", "img/logo_boxingjellyfish.png");
+        this.imgLogo.alpha = 0;
+        this.imgLogo.width = "256px";
+        this.imgLogo.height = "256px";
+        this.advancedTexture.addControl(this.imgLogo);
+
+        let logoAnimationKeys = [];
+        logoAnimationKeys.push({
+            frame: 0,
+            value: 0.0
+        });
+        logoAnimationKeys.push({
+            frame: 30,
+            value: 1.0
+        });
+        logoAnimationKeys.push({
+            frame: 90,
+            value: 1.0
+        });
+        logoAnimationKeys.push({
+            frame: 120,
+            value: 0.0
+        });
+
+        let logoAnimation = new BABYLON.Animation("logoAnimation", "alpha", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT);
+        logoAnimation.setKeys(logoAnimationKeys);
+
+        let logoEasingFunction = new BABYLON.QuadraticEase();
+        logoEasingFunction.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+        logoAnimation.setEasingFunction(logoEasingFunction)
+
+        this.imgLogo.animations = [];
+        this.imgLogo.animations.push(logoAnimation);
+
+        this.scene.beginAnimation(this.imgLogo, 0, 120, false, 1, () => {
+            // Required delay to correctly dispose the scene
+            window.setTimeout(() => {
+                this.actionsHandler.menuAction();
+            }, 50);
+        });
+
+        return this.scene;
+    }
+}
+
+module.exports = Splash;
+},{"./util/color_hsl.js":5}],5:[function(require,module,exports){
 class ColorHSL {
 
     constructor(h, s, l) {

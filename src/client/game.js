@@ -1,4 +1,4 @@
-const ColorHSL = require("./util/color_hsl.js");
+const Splash = require("./splash.js");
 const Menu = require("./menu.js");
 const Match = require("./match.js");
 
@@ -8,6 +8,7 @@ class Game {
         this.canvas = document.getElementById(canvasElement);
         this.engine = new BABYLON.Engine(this.canvas, true);
         this.socket = io();
+        this.splash = new Splash(this.canvas, this.engine, this.socket, this);
         this.menu = new Menu(this.canvas, this.engine, this.socket, this);
         this.match = new Match(this.canvas, this.engine, this.socket);
 
@@ -41,8 +42,11 @@ class Game {
         if (scene && scene == "match") {
             this.scene = this.match.createMatchScene();
         }
-        else {
+        else if (scene && scene == "menu") {
             this.scene = this.menu.createMainMenuScene();
+        }
+        else {
+            this.scene = this.splash.createSplashScene();
         }
     }
 
@@ -51,6 +55,11 @@ class Game {
         this.engine.runRenderLoop(() => {
             this.scene.render();
         });
+    }
+
+    menuAction() {
+        this.scene.dispose();
+        this.scene = this.menu.createMainMenuScene();
     }
 
     newGameAction() {
@@ -79,7 +88,7 @@ class Game {
             }
         }
     }
-    
+
     // Debug layer
     toggleDebugLayer() {
         if (this.scene.debugLayer.isVisible()) {

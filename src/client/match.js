@@ -8,7 +8,7 @@ class Match {
         this.socket = socket;
         this.scene = null;
         this.camera = null;
-
+        this.advancedTexture = null;
         this.hoverText = null;
 
         this.materials = [];
@@ -35,7 +35,7 @@ class Match {
         let defaultZoom = 150;
         let mapCenter = new BABYLON.Vector3(110, 50, 0);
 
-        this.camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", alphaCenter, betaCenter + 0.5, defaultZoom, mapCenter, this.scene);
+        this.camera = new BABYLON.ArcRotateCamera("matchCamera", alphaCenter, betaCenter + 0.5, defaultZoom, mapCenter, this.scene);
         this.camera.attachControl(this.canvas, false);
         this.camera.lowerRadiusLimit = 50;
         this.camera.upperRadiusLimit = 300;
@@ -187,7 +187,7 @@ class Match {
     }
 
     createUI(scene) {
-        let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+        this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
         let buttonHoverSound = new BABYLON.Sound("buttonHoverSound", "audio/beep-29.wav", scene);
         let buttonClickSound = new BABYLON.Sound("buttonClickSound", "audio/button-35.wav", scene);
@@ -214,7 +214,7 @@ class Match {
         btnDebug.onPointerEnterObservable.add(() => {
             buttonHoverSound.play();
         });
-        //advancedTexture.addControl(btnDebug);
+        //this.advancedTexture.addControl(btnDebug);
 
         this.hoverText = new BABYLON.GUI.TextBlock();
         this.hoverText.width = "400px";
@@ -228,7 +228,7 @@ class Match {
         this.hoverText.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.hoverText.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         this.hoverText.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-        advancedTexture.addControl(this.hoverText);
+        this.advancedTexture.addControl(this.hoverText);
 
         window.addEventListener("mousemove", () => {
             this.hoverText.left = this.scene.pointerX + 20;
