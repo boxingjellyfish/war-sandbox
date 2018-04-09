@@ -90,8 +90,20 @@ class Match {
         this.scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
         this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
 
-        this.camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), this.scene);
-        //this.camera.attachControl(this.canvas, false);
+        let alphaCenter = -Math.PI * 0.5;
+        let betaCenter = Math.PI * 0.5;
+        let defaultZoom = 150;
+        let mapCenter = new BABYLON.Vector3(110, 50, 0);
+
+        this.camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", alphaCenter, betaCenter + 0.5, defaultZoom, mapCenter, this.scene);
+        this.camera.attachControl(this.canvas, false);
+        this.camera.lowerRadiusLimit = 50;
+        this.camera.upperRadiusLimit = 300;
+        this.camera.lowerAlphaLimit = alphaCenter - 0.5;
+        this.camera.upperAlphaLimit = alphaCenter + 0.5;
+        this.camera.lowerBetaLimit = betaCenter - 0.5;
+        this.camera.upperBetaLimit = betaCenter + 0.5;
+        console.log(this.camera.inputs.attached);
 
         this.createUI(this.scene);
 
