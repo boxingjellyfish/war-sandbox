@@ -25,7 +25,7 @@ class Match {
 
     createMatchScene() {
         this.scene = new BABYLON.Scene(this.engine);
-        this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+        this.scene.clearColor = new ColorHSL(0.6, 0.6, 0.1).toColor4();
         this.scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
         this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
 
@@ -107,9 +107,7 @@ class Match {
     }
 
     drawConnections() {
-        let pointZ = -0.1;
-        let discMaterial = new BABYLON.StandardMaterial("disc_material", this.scene)
-        discMaterial.emissiveColor = new ColorHSL(0, 0, 0.7).toColor3();
+        let pointZ = 0.2;
         for (let connection of this.map.connections) {
             for (let i = 1; i < connection.points.length; i++) {
                 let from = connection.points[i - 1];
@@ -118,19 +116,24 @@ class Match {
                 let pointTo = new BABYLON.Vector3(to.x, to.y, pointZ);
                 let norm = pointTo.subtract(pointFrom).normalize();
                 let next = pointFrom.add(norm);
-                let disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, arc: 1, tessellation: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
-                disc.position = new BABYLON.Vector3(next.x, next.y, next.z);
-                disc.material = discMaterial;
+                this.drawConnectionDot(pointFrom);
+                this.drawConnectionDot(next);
                 let diff = pointTo.subtract(next).length();
                 while (diff > norm.length()) {
                     next = next.add(norm);
-                    disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, arc: 1, tessellation: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
-                    disc.position = next.clone();
-                    disc.material = discMaterial;
+                    this.drawConnectionDot(next);
                     diff = pointTo.subtract(next).length();
                 }
             }
         }
+    }
+
+    drawConnectionDot(position) {
+        let discMaterial = new BABYLON.StandardMaterial("disc_material", this.scene)
+        discMaterial.emissiveColor = new ColorHSL(0, 0, 0.5).toColor3();
+        let disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, arc: 1, tessellation: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
+        disc.position = position.clone();
+        disc.material = discMaterial;
     }
 
     onTerrytoryClicked(meshClicked) {

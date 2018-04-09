@@ -22,7 +22,16 @@ class Game {
             e.preventDefault();
         };
 
-        this.scene = this.menu.createMainMenuScene();
+        let url = new URL(window.location.href);
+        var scene = url.searchParams.get("scene");
+        if (scene) {
+            console.log("Load scene: " + scene);
+            if (scene == "match")
+                this.scene = this.match.createMatchScene();
+        }
+        else {
+            this.scene = this.menu.createMainMenuScene();
+        }
     }
 
     // run the render loop
@@ -75,7 +84,7 @@ class Match {
 
     createMatchScene() {
         this.scene = new BABYLON.Scene(this.engine);
-        this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+        this.scene.clearColor = new ColorHSL(0.6, 0.6, 0.1).toColor4();
         this.scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
         this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
 
@@ -157,9 +166,7 @@ class Match {
     }
 
     drawConnections() {
-        let pointZ = -0.1;
-        let discMaterial = new BABYLON.StandardMaterial("disc_material", this.scene)
-        discMaterial.emissiveColor = new ColorHSL(0, 0, 0.7).toColor3();
+        let pointZ = 0.2;
         for (let connection of this.map.connections) {
             for (let i = 1; i < connection.points.length; i++) {
                 let from = connection.points[i - 1];
@@ -168,19 +175,24 @@ class Match {
                 let pointTo = new BABYLON.Vector3(to.x, to.y, pointZ);
                 let norm = pointTo.subtract(pointFrom).normalize();
                 let next = pointFrom.add(norm);
-                let disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, arc: 1, tessellation: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
-                disc.position = new BABYLON.Vector3(next.x, next.y, next.z);
-                disc.material = discMaterial;
+                this.drawConnectionDot(pointFrom);
+                this.drawConnectionDot(next);
                 let diff = pointTo.subtract(next).length();
                 while (diff > norm.length()) {
                     next = next.add(norm);
-                    disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, arc: 1, tessellation: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
-                    disc.position = next.clone();
-                    disc.material = discMaterial;
+                    this.drawConnectionDot(next);
                     diff = pointTo.subtract(next).length();
                 }
             }
         }
+    }
+
+    drawConnectionDot(position) {
+        let discMaterial = new BABYLON.StandardMaterial("disc_material", this.scene)
+        discMaterial.emissiveColor = new ColorHSL(0, 0, 0.5).toColor3();
+        let disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, arc: 1, tessellation: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
+        disc.position = position.clone();
+        disc.material = discMaterial;
     }
 
     onTerrytoryClicked(meshClicked) {
@@ -296,7 +308,7 @@ class Menu {
         this.txtGameTitle.height = "40px";
         this.txtGameTitle.text = "WAR II ONLINE";
         this.txtGameTitle.fontFamily = "Share Tech Mono";
-        this.txtGameTitle.color = new ColorHSL(0.3, 0.9, 0.5).toRGBString();
+        this.txtGameTitle.color = new ColorHSL(0, 0, 0.5).toRGBString();
         this.txtGameTitle.alpha = 0.0;
         this.txtGameTitle.fontSize = 48;
         this.advancedTexture.addControl(this.txtGameTitle);
@@ -336,7 +348,7 @@ class Menu {
         this.btnCreateMatch.width = "200px";
         this.btnCreateMatch.height = "30px";
         this.btnCreateMatch.fontFamily = "Share Tech Mono";
-        this.btnCreateMatch.color = new ColorHSL(0.3, 0.9, 0.5).toRGBString();
+        this.btnCreateMatch.color = new ColorHSL(0, 0, 0.5).toRGBString();
         this.btnCreateMatch.alpha = 0.0;
         this.btnCreateMatch.fontSize = 16;
         this.btnCreateMatch.top = "100px";
@@ -370,7 +382,7 @@ class Menu {
         this.btnJoinMatch.width = "200px";
         this.btnJoinMatch.height = "30px";
         this.btnJoinMatch.fontFamily = "Share Tech Mono";
-        this.btnJoinMatch.color = new ColorHSL(0.3, 0.9, 0.5).toRGBString();
+        this.btnJoinMatch.color = new ColorHSL(0, 0, 0.5).toRGBString();
         this.btnJoinMatch.alpha = 0.0;
         this.btnJoinMatch.fontSize = 16;
         this.btnJoinMatch.top = "140px";
@@ -401,11 +413,11 @@ class Menu {
     enableButtonInteractions() {
         this.btnCreateMatch.onPointerEnterObservable.add(() => {
             this.buttonHoverSound.play();
-            this.btnCreateMatch.color = new ColorHSL(0.3, 0.9, 0.7).toRGBString();
+            this.btnCreateMatch.color = new ColorHSL(0, 0, 0.7).toRGBString();
             this.btnCreateMatch.text = "> CREATE NEW MATCH <";
         });
         this.btnCreateMatch.onPointerOutObservable.add(() => {
-            this.btnCreateMatch.color = new ColorHSL(0.3, 0.9, 0.5).toRGBString();
+            this.btnCreateMatch.color = new ColorHSL(0, 0, 0.5).toRGBString();
             this.btnCreateMatch.text = "CREATE NEW MATCH";
         });
         this.btnCreateMatch.onPointerUpObservable.add(() => {
@@ -418,11 +430,11 @@ class Menu {
 
         this.btnJoinMatch.onPointerEnterObservable.add(() => {
             this.buttonHoverSound.play();
-            this.btnJoinMatch.color = new ColorHSL(0.3, 0.9, 0.7).toRGBString();
+            this.btnJoinMatch.color = new ColorHSL(0, 0, 0.7).toRGBString();
             this.btnJoinMatch.text = "> JOIN EXISTING MATCH <";
         });
         this.btnJoinMatch.onPointerOutObservable.add(() => {
-            this.btnJoinMatch.color = new ColorHSL(0.3, 0.9, 0.5).toRGBString();
+            this.btnJoinMatch.color = new ColorHSL(0, 0, 0.5).toRGBString();
             this.btnJoinMatch.text = "JOIN EXISTING MATCH";
         });
         this.btnJoinMatch.onPointerUpObservable.add(() => {
@@ -514,6 +526,11 @@ class ColorHSL {
         let g = Math.floor(color3.g * 255);
         let b = Math.floor(color3.b * 255);
         return "rgb(" + r + "," + g + "," + b + ")";
+    }
+
+    toColor4(a = 1) {
+        let color3 = this.toColor3();
+        return new BABYLON.Color4(color3.r, color3.g, color3.b, a);
     }
 }
 

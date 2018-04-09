@@ -80,6 +80,11 @@ class ColorHSL {
         let b = Math.floor(color3.b * 255);
         return "rgb(" + r + "," + g + "," + b + ")";
     }
+
+    toColor4(a = 1) {
+        let color3 = this.toColor3();
+        return new BABYLON.Color4(color3.r, color3.g, color3.b, a);
+    }
 }
 
 module.exports = ColorHSL;

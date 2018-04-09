@@ -46,7 +46,7 @@ class Menu {
         this.txtGameTitle.height = "40px";
         this.txtGameTitle.text = "WAR II ONLINE";
         this.txtGameTitle.fontFamily = "Share Tech Mono";
-        this.txtGameTitle.color = new ColorHSL(0.3, 0.9, 0.5).toRGBString();
+        this.txtGameTitle.color = new ColorHSL(0, 0, 0.5).toRGBString();
         this.txtGameTitle.alpha = 0.0;
         this.txtGameTitle.fontSize = 48;
         this.advancedTexture.addControl(this.txtGameTitle);
@@ -86,7 +86,7 @@ class Menu {
         this.btnCreateMatch.width = "200px";
         this.btnCreateMatch.height = "30px";
         this.btnCreateMatch.fontFamily = "Share Tech Mono";
-        this.btnCreateMatch.color = new ColorHSL(0.3, 0.9, 0.5).toRGBString();
+        this.btnCreateMatch.color = new ColorHSL(0, 0, 0.5).toRGBString();
         this.btnCreateMatch.alpha = 0.0;
         this.btnCreateMatch.fontSize = 16;
         this.btnCreateMatch.top = "100px";
@@ -120,7 +120,7 @@ class Menu {
         this.btnJoinMatch.width = "200px";
         this.btnJoinMatch.height = "30px";
         this.btnJoinMatch.fontFamily = "Share Tech Mono";
-        this.btnJoinMatch.color = new ColorHSL(0.3, 0.9, 0.5).toRGBString();
+        this.btnJoinMatch.color = new ColorHSL(0, 0, 0.5).toRGBString();
         this.btnJoinMatch.alpha = 0.0;
         this.btnJoinMatch.fontSize = 16;
         this.btnJoinMatch.top = "140px";
@@ -151,11 +151,11 @@ class Menu {
     enableButtonInteractions() {
         this.btnCreateMatch.onPointerEnterObservable.add(() => {
             this.buttonHoverSound.play();
-            this.btnCreateMatch.color = new ColorHSL(0.3, 0.9, 0.7).toRGBString();
+            this.btnCreateMatch.color = new ColorHSL(0, 0, 0.7).toRGBString();
             this.btnCreateMatch.text = "> CREATE NEW MATCH <";
         });
         this.btnCreateMatch.onPointerOutObservable.add(() => {
-            this.btnCreateMatch.color = new ColorHSL(0.3, 0.9, 0.5).toRGBString();
+            this.btnCreateMatch.color = new ColorHSL(0, 0, 0.5).toRGBString();
             this.btnCreateMatch.text = "CREATE NEW MATCH";
         });
         this.btnCreateMatch.onPointerUpObservable.add(() => {
@@ -168,11 +168,11 @@ class Menu {
 
         this.btnJoinMatch.onPointerEnterObservable.add(() => {
             this.buttonHoverSound.play();
-            this.btnJoinMatch.color = new ColorHSL(0.3, 0.9, 0.7).toRGBString();
+            this.btnJoinMatch.color = new ColorHSL(0, 0, 0.7).toRGBString();
             this.btnJoinMatch.text = "> JOIN EXISTING MATCH <";
         });
         this.btnJoinMatch.onPointerOutObservable.add(() => {
-            this.btnJoinMatch.color = new ColorHSL(0.3, 0.9, 0.5).toRGBString();
+            this.btnJoinMatch.color = new ColorHSL(0, 0, 0.5).toRGBString();
             this.btnJoinMatch.text = "JOIN EXISTING MATCH";
         });
         this.btnJoinMatch.onPointerUpObservable.add(() => {

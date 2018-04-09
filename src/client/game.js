@@ -21,7 +21,16 @@ class Game {
             e.preventDefault();
         };
 
-        this.scene = this.menu.createMainMenuScene();
+        let url = new URL(window.location.href);
+        var scene = url.searchParams.get("scene");
+        if (scene) {
+            console.log("Load scene: " + scene);
+            if (scene == "match")
+                this.scene = this.match.createMatchScene();
+        }
+        else {
+            this.scene = this.menu.createMainMenuScene();
+        }
     }
 
     // run the render loop
