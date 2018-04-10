@@ -1,1 +1,719 @@
-!function(){function t(e,n,i){function s(a,r){if(!n[a]){if(!e[a]){var h="function"==typeof require&&require;if(!r&&h)return h(a,!0);if(o)return o(a,!0);var c=new Error("Cannot find module '"+a+"'");throw c.code="MODULE_NOT_FOUND",c}var l=n[a]={exports:{}};e[a][0].call(l.exports,function(t){var n=e[a][1][t];return s(n?n:t)},l,l.exports,t,e,n,i)}return n[a].exports}for(var o="function"==typeof require&&require,a=0;a<i.length;a++)s(i[a]);return s}return t}()({1:[function(t,e,n){const i=t("./splash.js"),s=t("./menu.js"),o=t("./match.js");class a{constructor(t){this.canvas=document.getElementById(t),this.engine=new BABYLON.Engine(this.canvas,!0),this.socket=io(),this.splash=new i(this.canvas,this.engine,this.socket,this),this.menu=new s(this.canvas,this.engine,this.socket,this),this.match=new o(this.canvas,this.engine,this.socket),window.addEventListener("resize",()=>{this.engine.resize()}),this.canvas.oncontextmenu=(t=>{t.preventDefault()}),document.addEventListener("keydown",t=>{"KeyF"==t.code&&this.toggleFullScreen()},!1),document.addEventListener("keydown",t=>{"KeyD"==t.code&&this.toggleDebugLayer()},!1);let e=new URL(window.location.href);var n=e.searchParams.get("scene");this.scene=n&&"match"==n?this.match.createMatchScene():n&&"menu"==n?this.menu.createMainMenuScene():this.splash.createSplashScene()}run(){this.engine.runRenderLoop(()=>{this.scene.render()})}menuAction(){this.scene.dispose(),this.scene=this.menu.createMainMenuScene()}newGameAction(){this.scene.dispose(),this.scene=this.match.createMatchScene()}toggleFullScreen(){document.fullscreenElement||document.mozFullScreenElement||document.webkitFullscreenElement?document.cancelFullScreen?document.cancelFullScreen():document.mozCancelFullScreen?document.mozCancelFullScreen():document.webkitCancelFullScreen&&document.webkitCancelFullScreen():document.documentElement.requestFullscreen?document.documentElement.requestFullscreen():document.documentElement.mozRequestFullScreen?document.documentElement.mozRequestFullScreen():document.documentElement.webkitRequestFullscreen&&document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT)}toggleDebugLayer(){this.scene.debugLayer.isVisible()?this.scene.debugLayer.hide():this.scene.debugLayer.show()}}e.exports=a,new a("renderCanvas").run()},{"./match.js":2,"./menu.js":3,"./splash.js":4}],2:[function(t,e,n){const i=t("./util/color_hsl.js");class s{constructor(t,e,n){this.canvas=t,this.engine=e,this.socket=n,this.scene=null,this.camera=null,this.advancedTexture=null,this.hoverText=null,this.materials=[],this.map=null,this.socket.on("load_map",t=>{this.map=t,this.loadMap()}),this.socket.on("chat_broadcast_message",t=>{console.log("CHAT >> "+t)})}createMatchScene(){this.scene=new BABYLON.Scene(this.engine),this.scene.clearColor=new i(.6,.6,.1).toColor4(),this.scene.defaultCursor="url('/img/cursors/green_select.cur'), auto ",this.scene.hoverCursor="url('/img/cursors/yellow_select.cur'), auto ";let t=.5*-Math.PI,e=.5*Math.PI,n=new BABYLON.Vector3(110,50,0);return this.camera=new BABYLON.ArcRotateCamera("matchCamera",t,e+.5,150,n,this.scene),this.camera.attachControl(this.canvas,!1),this.camera.lowerRadiusLimit=50,this.camera.upperRadiusLimit=300,this.camera.lowerAlphaLimit=t-.5,this.camera.upperAlphaLimit=t+.5,this.camera.lowerBetaLimit=e-.5,this.camera.upperBetaLimit=e+.5,this.camera.inputs.remove(this.camera.inputs.attached.keyboard),this.camera.inputs.remove(this.camera.inputs.attached.pointers),this.createUI(this.scene),this.socket.emit("client_ready"),this.scene}loadMap(){for(let t of this.map.regions)for(let e of t.territories){let t=[],n=[];for(let i of e.borders)t.push(new BABYLON.Vector3(i.x,i.y,0)),n.push(new BABYLON.Vector3(i.x,0,i.y));t.push(new BABYLON.Vector3(e.borders[0].x,e.borders[0].y,0)),n.push(new BABYLON.Vector3(e.borders[0].x,0,e.borders[0].y));let s=new i(0,0,.3).toColor3(),o=new i(0,0,.5).toColor3(),a=new BABYLON.GridMaterial(e.id+"_grid_material",this.scene);a.lineColor=s,a.majorUnitFrequency=0,this.materials.push(a);let r=new BABYLON.StandardMaterial(e.id+"_material",this.scene);r.emissiveColor=s,this.materials.push(r);let h=BABYLON.MeshBuilder.CreatePolygon(e.id+"_polygon",{shape:n,sideOrientation:BABYLON.Mesh.DOUBLESIDE},this.scene);h.material=a,h.rotate(BABYLON.Axis.X,-Math.PI/2,BABYLON.Space.WORLD);let c=BABYLON.MeshBuilder.CreateLines(e.id+"_lines",{points:t,updatable:!1,instance:null},this.scene);c.color=o,h.actionManager=new BABYLON.ActionManager(this.scene),h.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger,t=>{t.meshUnderPointer.material=this.getMaterialByName(t.meshUnderPointer.name.replace("_polygon","_material")),this.hoverText.text=t.meshUnderPointer.name.replace("_polygon",""),this.hoverText.alpha=1})),h.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger,t=>{t.meshUnderPointer.material=this.getMaterialByName(t.meshUnderPointer.name.replace("_polygon","_grid_material")),this.hoverText.alpha=0,this.hoverText.text=""})),h.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger,t=>{if(t.meshUnderPointer){let e=t.meshUnderPointer;this.onTerrytoryClicked(e)}}))}this.drawConnections()}drawConnections(){for(let t of this.map.connections)for(let e=1;e<t.points.length;e++){let n=t.points[e-1],i=t.points[e],s=new BABYLON.Vector3(n.x,n.y,.2),o=new BABYLON.Vector3(i.x,i.y,.2),a=o.subtract(s).normalize(),r=s.add(a);this.drawConnectionDot(s),this.drawConnectionDot(r);let h=o.subtract(r).length();for(;h>a.length();)r=r.add(a),this.drawConnectionDot(r),h=o.subtract(r).length()}}drawConnectionDot(t){let e=new BABYLON.StandardMaterial("disc_material",this.scene);e.emissiveColor=new i(0,0,.5).toColor3();let n=BABYLON.MeshBuilder.CreateDisc("disc",{radius:.25,arc:1,tessellation:50,sideOrientation:BABYLON.Mesh.DOUBLESIDE},this.scene);n.position=t.clone(),n.material=e}onTerrytoryClicked(t){let e=t.name.replace("_polygon","");t.material.lineColor=new i(0,0,.5).toColor3();for(let t of this.map.regions)for(let n of t.territories)if(n.id==e&&n.neighbours)for(let t of n.neighbours){let e=this.scene.getMeshByName(t.id+"_polygon");e.material.lineColor=new i(0,0,.7).toColor3()}this.socket.emit("chat_send_message",e),e.startsWith("a")&&this.socket.emit("chat_client_rename","player_"+e)}getMaterialByName(t){for(let e of this.materials)if(e.name==t)return e}createUI(t){this.advancedTexture=BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");let e=new BABYLON.Sound("buttonHoverSound","audio/beep-29.wav",t),n=new BABYLON.Sound("buttonClickSound","audio/button-35.wav",t),s=BABYLON.GUI.Button.CreateSimpleButton("btnDebug","Debug");s.width="100px",s.height="40px",s.color="white",s.background="grey",s.top="-20px",s.left="20px",s.fontFamily="Share Tech Mono",s.horizontalAlignment=BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT,s.verticalAlignment=BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM,s.onPointerUpObservable.add(()=>{n.play(),this.scene.debugLayer.isVisible()?this.scene.debugLayer.hide():this.scene.debugLayer.show()}),s.onPointerEnterObservable.add(()=>{e.play()}),this.hoverText=new BABYLON.GUI.TextBlock,this.hoverText.width="400px",this.hoverText.height="40px",this.hoverText.text="",this.hoverText.fontFamily="Share Tech Mono",this.hoverText.color=new i(0,0,.7).toRGBString(),this.hoverText.alpha=0,this.hoverText.fontSize=14,this.hoverText.horizontalAlignment=BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT,this.hoverText.verticalAlignment=BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP,this.hoverText.textHorizontalAlignment=BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT,this.hoverText.textVerticalAlignment=BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP,this.advancedTexture.addControl(this.hoverText),window.addEventListener("mousemove",()=>{this.hoverText.left=this.scene.pointerX+20,this.hoverText.top=this.scene.pointerY+20})}}e.exports=s},{"./util/color_hsl.js":5}],3:[function(t,e,n){const i=t("./util/color_hsl.js");class s{constructor(t,e,n,i){this.canvas=t,this.engine=e,this.socket=n,this.actionsHandler=i,this.scene=null,this.camera=null,this.advancedTexture=null,this.menuMusic=null,this.buttonHoverSound=null,this.buttonClickSound=null,this.txtGameTitle=null,this.btnCreateMatch=null,this.btnJoinMatch=null}createMainMenuScene(){return this.scene=new BABYLON.Scene(this.engine),this.scene.clearColor=new BABYLON.Color4(0,0,0,1),this.scene.defaultCursor="url('/img/cursors/green_select.cur'), auto ",this.scene.hoverCursor="url('/img/cursors/yellow_select.cur'), auto ",this.camera=new BABYLON.ArcRotateCamera("mainMenuCamera",.5*-Math.PI,.6*Math.PI,150,new BABYLON.Vector3(110,50,0),this.scene),this.camera.attachControl(this.canvas,!1),this.scene.activeCamera=this.camera,this.advancedTexture=BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI"),this.menuMusic=new BABYLON.Sound("buttonHoverSound","audio/menu.mp3",this.scene,null,{autoplay:!0,loop:!0}),this.buttonHoverSound=new BABYLON.Sound("buttonHoverSound","audio/beep-29.wav",this.scene),this.buttonClickSound=new BABYLON.Sound("buttonClickSound","audio/button-35.wav",this.scene),this.createTitle(),this.createNewGameButton(),this.createJoinGameButton(),this.scene}createTitle(){this.txtGameTitle=new BABYLON.GUI.TextBlock,this.txtGameTitle.width="400px",this.txtGameTitle.height="40px",this.txtGameTitle.text="WAR II ONLINE",this.txtGameTitle.fontFamily="Share Tech Mono",this.txtGameTitle.color=new i(0,0,.5).toRGBString(),this.txtGameTitle.alpha=0,this.txtGameTitle.fontSize=48,this.advancedTexture.addControl(this.txtGameTitle);let t=[];t.push({frame:0,value:0}),t.push({frame:30,value:1});let e=new BABYLON.Animation("titleAnimation","alpha",30,BABYLON.Animation.ANIMATIONTYPE_FLOAT);e.setKeys(t);let n=new BABYLON.QuadraticEase;n.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT),e.setEasingFunction(n),this.txtGameTitle.animations=[],this.txtGameTitle.animations.push(e),this.scene.beginAnimation(this.txtGameTitle,0,30,!1,1,()=>{this.scene.beginAnimation(this.btnCreateMatch,0,30,!1,1,()=>{this.scene.beginAnimation(this.btnJoinMatch,0,30,!1,1,()=>{this.enableButtonInteractions()})})})}createNewGameButton(){this.btnCreateMatch=new BABYLON.GUI.TextBlock,this.btnCreateMatch.text="CREATE NEW MATCH",this.btnCreateMatch.width="200px",this.btnCreateMatch.height="30px",this.btnCreateMatch.fontFamily="Share Tech Mono",this.btnCreateMatch.color=new i(0,0,.5).toRGBString(),this.btnCreateMatch.alpha=0,this.btnCreateMatch.fontSize=16,this.btnCreateMatch.top="100px";let t=[];t.push({frame:0,value:0}),t.push({frame:30,value:1});let e=new BABYLON.Animation("newGameAnimation","alpha",30,BABYLON.Animation.ANIMATIONTYPE_FLOAT);e.setKeys(t);let n=new BABYLON.QuadraticEase;n.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT),e.setEasingFunction(n),this.btnCreateMatch.animations=[],this.btnCreateMatch.animations.push(e),this.advancedTexture.addControl(this.btnCreateMatch)}createJoinGameButton(){this.btnJoinMatch=new BABYLON.GUI.TextBlock,this.btnJoinMatch.text="JOIN EXISTING MATCH",this.btnJoinMatch.width="200px",this.btnJoinMatch.height="30px",this.btnJoinMatch.fontFamily="Share Tech Mono",this.btnJoinMatch.color=new i(0,0,.5).toRGBString(),this.btnJoinMatch.alpha=0,this.btnJoinMatch.fontSize=16,this.btnJoinMatch.top="140px";let t=[];t.push({frame:0,value:0}),t.push({frame:30,value:1});let e=new BABYLON.Animation("newGameAnimation","alpha",30,BABYLON.Animation.ANIMATIONTYPE_FLOAT);e.setKeys(t);let n=new BABYLON.QuadraticEase;n.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT),e.setEasingFunction(n),this.btnJoinMatch.animations=[],this.btnJoinMatch.animations.push(e),this.advancedTexture.addControl(this.btnJoinMatch)}enableButtonInteractions(){this.btnCreateMatch.onPointerEnterObservable.add(()=>{this.buttonHoverSound.play(),this.btnCreateMatch.color=new i(0,0,.7).toRGBString(),this.btnCreateMatch.text="> CREATE NEW MATCH <"}),this.btnCreateMatch.onPointerOutObservable.add(()=>{this.btnCreateMatch.color=new i(0,0,.5).toRGBString(),this.btnCreateMatch.text="CREATE NEW MATCH"}),this.btnCreateMatch.onPointerUpObservable.add(()=>{this.menuMusic.pause(),this.buttonClickSound.play(),window.setTimeout(()=>{this.actionsHandler.newGameAction()},200)}),this.btnJoinMatch.onPointerEnterObservable.add(()=>{this.buttonHoverSound.play(),this.btnJoinMatch.color=new i(0,0,.7).toRGBString(),this.btnJoinMatch.text="> JOIN EXISTING MATCH <"}),this.btnJoinMatch.onPointerOutObservable.add(()=>{this.btnJoinMatch.color=new i(0,0,.5).toRGBString(),this.btnJoinMatch.text="JOIN EXISTING MATCH"}),this.btnJoinMatch.onPointerUpObservable.add(()=>{this.buttonClickSound.play()})}}e.exports=s},{"./util/color_hsl.js":5}],4:[function(t,e,n){t("./util/color_hsl.js");class i{constructor(t,e,n,i){this.canvas=t,this.engine=e,this.socket=n,this.actionsHandler=i,this.scene=null,this.camera=null,this.advancedTexture=null,this.splashSound=null,this.txtSplash=null,this.imgLogo=null}createSplashScene(){this.scene=new BABYLON.Scene(this.engine),this.scene.clearColor=new BABYLON.Color4(0,0,0,1),this.scene.defaultCursor="url('/img/cursors/green_select.cur'), auto ",this.scene.hoverCursor="url('/img/cursors/yellow_select.cur'), auto ",this.camera=new BABYLON.ArcRotateCamera("splashCamera",.5*-Math.PI,.6*Math.PI,150,new BABYLON.Vector3(110,50,0),this.scene),this.camera.attachControl(this.canvas,!1),this.scene.activeCamera=this.camera,this.advancedTexture=BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI"),this.splashSound=new BABYLON.Sound("splashSound","audio/intro.mp3",this.scene,null,{autoplay:!0}),this.imgLogo=new BABYLON.GUI.Image("imgLogo","img/logo_boxingjellyfish.png"),this.imgLogo.alpha=0,this.imgLogo.width="256px",this.imgLogo.height="256px",this.advancedTexture.addControl(this.imgLogo);let t=[];t.push({frame:0,value:0}),t.push({frame:30,value:1}),t.push({frame:90,value:1}),t.push({frame:120,value:0});let e=new BABYLON.Animation("logoAnimation","alpha",30,BABYLON.Animation.ANIMATIONTYPE_FLOAT);e.setKeys(t);let n=new BABYLON.QuadraticEase;return n.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT),e.setEasingFunction(n),this.imgLogo.animations=[],this.imgLogo.animations.push(e),this.scene.beginAnimation(this.imgLogo,0,120,!1,1,()=>{window.setTimeout(()=>{this.actionsHandler.menuAction()},50)}),this.scene}}e.exports=i},{"./util/color_hsl.js":5}],5:[function(t,e,n){class i{constructor(t,e,n){this.h=t,this.s=e,this.l=n}toColor3(){let t,e,n;if(0==this.s)t=e=n=this.l;else{let i=function(t,e,n){return n<0&&(n+=1),n>1&&(n-=1),n<1/6?t+6*(e-t)*n:n<.5?e:n<2/3?t+(e-t)*(2/3-n)*6:t},s=this.l<.5?this.l*(1+this.s):this.l+this.s-this.l*this.s,o=2*this.l-s;t=i(o,s,this.h+1/3),e=i(o,s,this.h),n=i(o,s,this.h-1/3)}return new BABYLON.Color3(t,e,n)}fromColor3(t,e,n){let i=Math.max(t,e,n),s=Math.min(t,e,n);if(this.h=(i+s)/2,this.s=(i+s)/2,this.l=(i+s)/2,i==s)this.h=this.s=0;else{let o=i-s;switch(this.s=this.l>.5?o/(2-i-s):o/(i+s),i){case t:this.h=(e-n)/o+(e<n?6:0);break;case e:this.h=(n-t)/o+2;break;case n:this.h=(t-e)/o+4}this.h/=6}}toRGBString(){let t=this.toColor3();return"rgb("+Math.floor(255*t.r)+","+Math.floor(255*t.g)+","+Math.floor(255*t.b)+")"}toColor4(t=1){let e=this.toColor3();return new BABYLON.Color4(e.r,e.g,e.b,t)}}e.exports=i},{}]},{},[1]);
+(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
+const Splash = require("./splash.js");
+const Menu = require("./menu.js");
+const Match = require("./match.js");
+
+class Game {
+
+    constructor(canvasElement) {
+        this.canvas = document.getElementById(canvasElement);
+        this.engine = new BABYLON.Engine(this.canvas, true);
+        this.socket = io();
+        this.splash = new Splash(this.canvas, this.engine, this.socket, this);
+        this.menu = new Menu(this.canvas, this.engine, this.socket, this);
+        this.match = new Match(this.canvas, this.engine, this.socket);
+
+        // Listen for browser/canvas resize events
+        window.addEventListener("resize", () => {
+            this.engine.resize();
+        });
+
+        // Disable right click
+        this.canvas.oncontextmenu = (e) => {
+            e.preventDefault();
+        };
+
+        // Fullscreen F key
+        document.addEventListener("keydown", (e) => {
+            if (e.code == "KeyF") {
+                this.toggleFullScreen();
+            }
+        }, false);
+
+        // Debug console D key
+        document.addEventListener("keydown", (e) => {
+            if (e.code == "KeyD") {
+                this.toggleDebugLayer();
+            }
+        }, false);
+
+        // Load scene from parameter
+        let url = new URL(window.location.href);
+        var scene = url.searchParams.get("scene");
+        if (scene && scene == "match") {
+            this.scene = this.match.createMatchScene();
+        }
+        else if (scene && scene == "menu") {
+            this.scene = this.menu.createMainMenuScene();
+        }
+        else {
+            this.scene = this.splash.createSplashScene();
+        }
+    }
+
+    // run the render loop
+    run() {
+        this.engine.runRenderLoop(() => {
+            this.scene.render();
+        });
+    }
+
+    menuAction() {
+        this.scene.dispose();
+        this.scene = this.menu.createMainMenuScene();
+    }
+
+    newGameAction() {
+        this.scene.dispose();
+        this.scene = this.match.createMatchScene();
+    }
+
+    // Fullscreen cross browser support
+    toggleFullScreen() {
+        if (!document.fullscreenElement &&    // alternative standard method
+            !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) {
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+            }
+        } else {
+            if (document.cancelFullScreen) {
+                document.cancelFullScreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitCancelFullScreen) {
+                document.webkitCancelFullScreen();
+            }
+        }
+    }
+
+    // Debug layer
+    toggleDebugLayer() {
+        if (this.scene.debugLayer.isVisible()) {
+            this.scene.debugLayer.hide();
+        } else {
+            this.scene.debugLayer.show();
+        }
+    }
+}
+
+module.exports = Game;
+
+// Create the game using the "renderCanvas"
+const game = new Game("renderCanvas");
+
+// start animation
+game.run();
+
+},{"./match.js":2,"./menu.js":3,"./splash.js":4}],2:[function(require,module,exports){
+const ColorHSL = require("./util/color_hsl.js");
+
+class Match {
+
+    constructor(canvas, engine, socket) {
+        this.canvas = canvas;
+        this.engine = engine;
+        this.socket = socket;
+        this.scene = null;
+        this.camera = null;
+        this.advancedTexture = null;
+        this.hoverText = null;
+
+        this.materials = [];
+        this.map = null;
+
+        this.socket.on("load_map", (map) => {
+            this.map = map;
+            this.loadMap();
+        });
+
+        this.socket.on("chat_broadcast_message", (msg) => {
+            console.log("CHAT >> " + msg);
+        });
+    }
+
+    createMatchScene() {
+        this.scene = new BABYLON.Scene(this.engine);
+        this.scene.clearColor = new ColorHSL(0.6, 0.6, 0.1).toColor4();
+        this.scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
+        this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
+
+        let alphaCenter = -Math.PI * 0.5;
+        let betaCenter = Math.PI * 0.5;
+        let defaultZoom = 150;
+        let mapCenter = new BABYLON.Vector3(110, 50, 0);
+
+        this.camera = new BABYLON.ArcRotateCamera("matchCamera", alphaCenter, betaCenter + 0.5, defaultZoom, mapCenter, this.scene);
+        this.camera.attachControl(this.canvas, false);
+        this.camera.lowerRadiusLimit = 50;
+        this.camera.upperRadiusLimit = 300;
+        this.camera.lowerAlphaLimit = alphaCenter - 0.5;
+        this.camera.upperAlphaLimit = alphaCenter + 0.5;
+        this.camera.lowerBetaLimit = betaCenter - 0.5;
+        this.camera.upperBetaLimit = betaCenter + 0.5;
+
+        this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
+        this.camera.inputs.remove(this.camera.inputs.attached.pointers);
+
+        this.createUI(this.scene);
+
+        this.socket.emit("client_ready");
+        return this.scene;
+    }
+
+    loadMap() {
+        for (let region of this.map.regions) {
+            for (let territory of region.territories) {
+                let points = [];
+                let shape = [];
+                for (let border of territory.borders) {
+                    points.push(new BABYLON.Vector3(border.x, border.y, 0));
+                    shape.push(new BABYLON.Vector3(border.x, 0, border.y));
+                }
+                points.push(new BABYLON.Vector3(territory.borders[0].x, territory.borders[0].y, 0));
+                shape.push(new BABYLON.Vector3(territory.borders[0].x, 0, territory.borders[0].y));
+
+                //let regionColor = new ColorHSL(region.color.h, region.color.s, region.color.l).toColor3();
+                //let regionColorHighlight = new ColorHSL(region.color.h, region.color.s, region.color.l + 0.2).toColor3();
+
+                let regionColor = new ColorHSL(0, 0, 0.3).toColor3();
+                let regionColorHighlight = new ColorHSL(0, 0, 0.5).toColor3();
+
+                let gridMaterial = new BABYLON.GridMaterial(territory.id + "_grid_material", this.scene);
+                gridMaterial.lineColor = regionColor;
+                gridMaterial.majorUnitFrequency = 0;
+                this.materials.push(gridMaterial);
+
+                let polygonMaterial = new BABYLON.StandardMaterial(territory.id + "_material", this.scene);
+                polygonMaterial.emissiveColor = regionColor;
+                this.materials.push(polygonMaterial);
+
+                let polygon = BABYLON.MeshBuilder.CreatePolygon(territory.id + "_polygon", { shape: shape, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
+                polygon.material = gridMaterial; //polygonMaterial;
+                polygon.rotate(BABYLON.Axis.X, -Math.PI / 2, BABYLON.Space.WORLD);
+                let lines = BABYLON.MeshBuilder.CreateLines(territory.id + "_lines", { points: points, updatable: false, instance: null }, this.scene);
+                lines.color = regionColorHighlight;
+
+                polygon.actionManager = new BABYLON.ActionManager(this.scene);
+                polygon.actionManager.registerAction(
+                    new BABYLON.ExecuteCodeAction(
+                        BABYLON.ActionManager.OnPointerOverTrigger,
+                        (evt) => {
+                            evt.meshUnderPointer.material = this.getMaterialByName(evt.meshUnderPointer.name.replace("_polygon", "_material"));
+                            this.hoverText.text = evt.meshUnderPointer.name.replace("_polygon", "");
+                            this.hoverText.alpha = 1;
+                        }
+                    )
+                );
+                polygon.actionManager.registerAction(
+                    new BABYLON.ExecuteCodeAction(
+                        BABYLON.ActionManager.OnPointerOutTrigger,
+                        (evt) => {
+                            evt.meshUnderPointer.material = this.getMaterialByName(evt.meshUnderPointer.name.replace("_polygon", "_grid_material"));
+                            this.hoverText.alpha = 0;
+                            this.hoverText.text = "";
+                        }
+                    )
+                );
+                polygon.actionManager.registerAction(
+                    new BABYLON.ExecuteCodeAction(
+                        BABYLON.ActionManager.OnPickTrigger,
+                        (evt) => {
+                            if (evt.meshUnderPointer) {
+                                let meshClicked = evt.meshUnderPointer;
+                                this.onTerrytoryClicked(meshClicked);
+                            }
+                        }
+                    )
+                );
+            }
+        }
+
+        this.drawConnections();
+
+    }
+
+    drawConnections() {
+        let pointZ = 0.2;
+        for (let connection of this.map.connections) {
+            for (let i = 1; i < connection.points.length; i++) {
+                let from = connection.points[i - 1];
+                let to = connection.points[i];
+                let pointFrom = new BABYLON.Vector3(from.x, from.y, pointZ);
+                let pointTo = new BABYLON.Vector3(to.x, to.y, pointZ);
+                let norm = pointTo.subtract(pointFrom).normalize();
+                let next = pointFrom.add(norm);
+                this.drawConnectionDot(pointFrom);
+                this.drawConnectionDot(next);
+                let diff = pointTo.subtract(next).length();
+                while (diff > norm.length()) {
+                    next = next.add(norm);
+                    this.drawConnectionDot(next);
+                    diff = pointTo.subtract(next).length();
+                }
+            }
+        }
+    }
+
+    drawConnectionDot(position) {
+        let discMaterial = new BABYLON.StandardMaterial("disc_material", this.scene)
+        discMaterial.emissiveColor = new ColorHSL(0, 0, 0.5).toColor3();
+        let disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, arc: 1, tessellation: 50, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, this.scene);
+        disc.position = position.clone();
+        disc.material = discMaterial;
+    }
+
+    onTerrytoryClicked(meshClicked) {
+        let id = meshClicked.name.replace("_polygon", "");
+        //meshClicked.material.emissiveColor = new ColorHSL(0.6, 0.9, 0.3).toColor3();
+        meshClicked.material.lineColor = new ColorHSL(0, 0, 0.5).toColor3();
+        for (let region of this.map.regions) {
+            for (let territory of region.territories) {
+                if (territory.id == id) {
+                    if (territory.neighbours) {
+                        for (let neighbour of territory.neighbours) {
+                            let mesh = this.scene.getMeshByName(neighbour.id + "_polygon");
+                            //mesh.material.emissiveColor = new ColorHSL(0, 0.9, 0.3).toColor3();
+                            mesh.material.lineColor = new ColorHSL(0, 0, 0.7).toColor3();
+                        }
+                    }
+                }
+            }
+        }
+        this.socket.emit("chat_send_message", id);
+        if (id.startsWith("a")) {
+            this.socket.emit("chat_client_rename", "player_" + id);
+        }
+    }
+
+    getMaterialByName(name) {
+        for (let material of this.materials) {
+            if (material.name == name) {
+                return material;
+            }
+        }
+    }
+
+    createUI(scene) {
+        this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+        let buttonHoverSound = new BABYLON.Sound("buttonHoverSound", "audio/beep-29.wav", scene);
+        let buttonClickSound = new BABYLON.Sound("buttonClickSound", "audio/button-35.wav", scene);
+
+        let btnDebug = BABYLON.GUI.Button.CreateSimpleButton("btnDebug", "Debug");
+        btnDebug.width = "100px";
+        btnDebug.height = "40px";
+        btnDebug.color = "white";
+        btnDebug.background = "grey";
+        btnDebug.top = "-20px";
+        btnDebug.left = "20px";
+        btnDebug.fontFamily = "Share Tech Mono";
+        //btnDebug.fontFamily = "Nova Mono";
+        btnDebug.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        btnDebug.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+        btnDebug.onPointerUpObservable.add(() => {
+            buttonClickSound.play();
+            if (this.scene.debugLayer.isVisible()) {
+                this.scene.debugLayer.hide();
+            } else {
+                this.scene.debugLayer.show();
+            }
+        });
+        btnDebug.onPointerEnterObservable.add(() => {
+            buttonHoverSound.play();
+        });
+        //this.advancedTexture.addControl(btnDebug);
+
+        this.hoverText = new BABYLON.GUI.TextBlock();
+        this.hoverText.width = "400px";
+        this.hoverText.height = "40px";
+        this.hoverText.text = "";
+        this.hoverText.fontFamily = "Share Tech Mono";
+        this.hoverText.color = new ColorHSL(0, 0, 0.7).toRGBString();
+        this.hoverText.alpha = 0.0;
+        this.hoverText.fontSize = 14;
+        this.hoverText.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        this.hoverText.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        this.hoverText.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        this.hoverText.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        this.advancedTexture.addControl(this.hoverText);
+
+        window.addEventListener("mousemove", () => {
+            this.hoverText.left = this.scene.pointerX + 20;
+            this.hoverText.top = this.scene.pointerY + 20;
+        });
+
+        /*
+        this.scene.actionManager = new BABYLON.ActionManager(scene);
+        this.scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
+            if (evt.sourceEvent.key == "d") {
+                if (this.scene.debugLayer.isVisible()) {
+                    this.scene.debugLayer.hide();
+                } else {
+                    this.scene.debugLayer.show();
+                }
+            }
+        }));
+        */
+    }
+}
+
+module.exports = Match;
+},{"./util/color_hsl.js":5}],3:[function(require,module,exports){
+const ColorHSL = require("./util/color_hsl.js");
+
+class Menu {
+
+    constructor(canvas, engine, socket, actionsHandler) {
+        this.canvas = canvas;
+        this.engine = engine;
+        this.socket = socket;
+        this.actionsHandler = actionsHandler;
+        this.scene = null;
+        this.camera = null;
+        this.advancedTexture = null;
+        this.menuMusic = null;
+        this.buttonHoverSound = null;
+        this.buttonClickSound = null;
+        this.txtGameTitle = null;
+        this.btnCreateMatch = null;
+        this.btnJoinMatch = null;
+    }
+
+    createMainMenuScene() {
+        this.scene = new BABYLON.Scene(this.engine);
+        this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+        this.scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
+        this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
+
+        this.camera = new BABYLON.ArcRotateCamera("mainMenuCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), this.scene);
+        this.camera.attachControl(this.canvas, false);
+        this.scene.activeCamera = this.camera;
+
+        this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+        this.menuMusic = new BABYLON.Sound("buttonHoverSound", "audio/menu.mp3", this.scene, null, { autoplay: true, loop: true });
+        this.buttonHoverSound = new BABYLON.Sound("buttonHoverSound", "audio/beep-29.wav", this.scene);
+        this.buttonClickSound = new BABYLON.Sound("buttonClickSound", "audio/button-35.wav", this.scene);
+
+        this.createTitle();
+        this.createNewGameButton();
+        this.createJoinGameButton();
+
+        return this.scene;
+    }
+
+    createTitle() {
+        this.txtGameTitle = new BABYLON.GUI.TextBlock();
+        this.txtGameTitle.width = "400px";
+        this.txtGameTitle.height = "40px";
+        this.txtGameTitle.text = "WAR II ONLINE";
+        this.txtGameTitle.fontFamily = "Share Tech Mono";
+        this.txtGameTitle.color = new ColorHSL(0, 0, 0.5).toRGBString();
+        this.txtGameTitle.alpha = 0.0;
+        this.txtGameTitle.fontSize = 48;
+        this.advancedTexture.addControl(this.txtGameTitle);
+
+        let titleAnimationKeys = [];
+        titleAnimationKeys.push({
+            frame: 0,
+            value: 0.0
+        });
+        titleAnimationKeys.push({
+            frame: 30,
+            value: 1.0
+        });
+
+        let titleAnimation = new BABYLON.Animation("titleAnimation", "alpha", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT);
+        titleAnimation.setKeys(titleAnimationKeys);
+
+        let titleEasingFunction = new BABYLON.QuadraticEase();
+        titleEasingFunction.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+        titleAnimation.setEasingFunction(titleEasingFunction)
+
+        this.txtGameTitle.animations = [];
+        this.txtGameTitle.animations.push(titleAnimation);
+
+        this.scene.beginAnimation(this.txtGameTitle, 0, 30, false, 1, () => {
+            this.scene.beginAnimation(this.btnCreateMatch, 0, 30, false, 1, () => {
+                this.scene.beginAnimation(this.btnJoinMatch, 0, 30, false, 1, () => {
+                    this.enableButtonInteractions();
+                });
+            });
+        });
+    }
+
+    createNewGameButton() {
+        this.btnCreateMatch = new BABYLON.GUI.TextBlock();
+        this.btnCreateMatch.text = "CREATE NEW MATCH";
+        this.btnCreateMatch.width = "200px";
+        this.btnCreateMatch.height = "30px";
+        this.btnCreateMatch.fontFamily = "Share Tech Mono";
+        this.btnCreateMatch.color = new ColorHSL(0, 0, 0.5).toRGBString();
+        this.btnCreateMatch.alpha = 0.0;
+        this.btnCreateMatch.fontSize = 16;
+        this.btnCreateMatch.top = "100px";
+
+        let btnCreateMatchAnimationKeys = [];
+        btnCreateMatchAnimationKeys.push({
+            frame: 0,
+            value: 0.0
+        });
+        btnCreateMatchAnimationKeys.push({
+            frame: 30,
+            value: 1.0
+        });
+
+        let btnCreateMatchAnimation = new BABYLON.Animation("newGameAnimation", "alpha", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT);
+        btnCreateMatchAnimation.setKeys(btnCreateMatchAnimationKeys);
+
+        let btnCreateMatchEasingFunction = new BABYLON.QuadraticEase();
+        btnCreateMatchEasingFunction.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+        btnCreateMatchAnimation.setEasingFunction(btnCreateMatchEasingFunction)
+
+        this.btnCreateMatch.animations = [];
+        this.btnCreateMatch.animations.push(btnCreateMatchAnimation);
+
+        this.advancedTexture.addControl(this.btnCreateMatch);
+    }
+
+    createJoinGameButton() {
+        this.btnJoinMatch = new BABYLON.GUI.TextBlock();
+        this.btnJoinMatch.text = "JOIN EXISTING MATCH";
+        this.btnJoinMatch.width = "200px";
+        this.btnJoinMatch.height = "30px";
+        this.btnJoinMatch.fontFamily = "Share Tech Mono";
+        this.btnJoinMatch.color = new ColorHSL(0, 0, 0.5).toRGBString();
+        this.btnJoinMatch.alpha = 0.0;
+        this.btnJoinMatch.fontSize = 16;
+        this.btnJoinMatch.top = "140px";
+
+        let btnJoinMatchAnimationKeys = [];
+        btnJoinMatchAnimationKeys.push({
+            frame: 0,
+            value: 0.0
+        });
+        btnJoinMatchAnimationKeys.push({
+            frame: 30,
+            value: 1.0
+        });
+
+        let btnJoinMatchAnimation = new BABYLON.Animation("newGameAnimation", "alpha", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT);
+        btnJoinMatchAnimation.setKeys(btnJoinMatchAnimationKeys);
+
+        let btnJoinMatchEasingFunction = new BABYLON.QuadraticEase();
+        btnJoinMatchEasingFunction.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+        btnJoinMatchAnimation.setEasingFunction(btnJoinMatchEasingFunction)
+
+        this.btnJoinMatch.animations = [];
+        this.btnJoinMatch.animations.push(btnJoinMatchAnimation);
+
+        this.advancedTexture.addControl(this.btnJoinMatch);
+    }
+
+    enableButtonInteractions() {
+        this.btnCreateMatch.onPointerEnterObservable.add(() => {
+            this.buttonHoverSound.play();
+            this.btnCreateMatch.color = new ColorHSL(0, 0, 0.7).toRGBString();
+            this.btnCreateMatch.text = "> CREATE NEW MATCH <";
+        });
+        this.btnCreateMatch.onPointerOutObservable.add(() => {
+            this.btnCreateMatch.color = new ColorHSL(0, 0, 0.5).toRGBString();
+            this.btnCreateMatch.text = "CREATE NEW MATCH";
+        });
+        this.btnCreateMatch.onPointerUpObservable.add(() => {
+            this.menuMusic.pause();
+            this.buttonClickSound.play();
+            window.setTimeout(() => {
+                this.actionsHandler.newGameAction();
+            }, 200);
+        });
+
+        this.btnJoinMatch.onPointerEnterObservable.add(() => {
+            this.buttonHoverSound.play();
+            this.btnJoinMatch.color = new ColorHSL(0, 0, 0.7).toRGBString();
+            this.btnJoinMatch.text = "> JOIN EXISTING MATCH <";
+        });
+        this.btnJoinMatch.onPointerOutObservable.add(() => {
+            this.btnJoinMatch.color = new ColorHSL(0, 0, 0.5).toRGBString();
+            this.btnJoinMatch.text = "JOIN EXISTING MATCH";
+        });
+        this.btnJoinMatch.onPointerUpObservable.add(() => {
+            this.buttonClickSound.play();
+        });
+    }
+}
+
+module.exports = Menu;
+},{"./util/color_hsl.js":5}],4:[function(require,module,exports){
+const ColorHSL = require("./util/color_hsl.js");
+
+class Splash {
+
+    constructor(canvas, engine, socket, actionsHandler) {
+        this.canvas = canvas;
+        this.engine = engine;
+        this.socket = socket;
+        this.actionsHandler = actionsHandler;
+        this.scene = null;
+        this.camera = null;
+        this.advancedTexture = null;
+        this.splashSound = null;
+        this.txtSplash = null;
+        this.imgLogo = null;
+    }
+
+    createSplashScene() {
+        this.scene = new BABYLON.Scene(this.engine);
+        this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+        this.scene.defaultCursor = "url('/img/cursors/green_select.cur'), auto ";
+        this.scene.hoverCursor = "url('/img/cursors/yellow_select.cur'), auto ";
+
+        this.camera = new BABYLON.ArcRotateCamera("splashCamera", -Math.PI * 0.5, Math.PI * 0.6, 150, new BABYLON.Vector3(110, 50, 0), this.scene);
+        this.camera.attachControl(this.canvas, false);
+        this.scene.activeCamera = this.camera;
+
+        this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+        this.splashSound = new BABYLON.Sound("splashSound", "audio/intro.mp3", this.scene, null, { autoplay: true });
+        this.imgLogo = new BABYLON.GUI.Image("imgLogo", "img/logo_boxingjellyfish.png");
+        this.imgLogo.alpha = 0;
+        this.imgLogo.width = "256px";
+        this.imgLogo.height = "256px";
+        this.advancedTexture.addControl(this.imgLogo);
+
+        let logoAnimationKeys = [];
+        logoAnimationKeys.push({
+            frame: 0,
+            value: 0.0
+        });
+        logoAnimationKeys.push({
+            frame: 30,
+            value: 1.0
+        });
+        logoAnimationKeys.push({
+            frame: 90,
+            value: 1.0
+        });
+        logoAnimationKeys.push({
+            frame: 120,
+            value: 0.0
+        });
+
+        let logoAnimation = new BABYLON.Animation("logoAnimation", "alpha", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT);
+        logoAnimation.setKeys(logoAnimationKeys);
+
+        let logoEasingFunction = new BABYLON.QuadraticEase();
+        logoEasingFunction.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+        logoAnimation.setEasingFunction(logoEasingFunction)
+
+        this.imgLogo.animations = [];
+        this.imgLogo.animations.push(logoAnimation);
+
+        this.scene.beginAnimation(this.imgLogo, 0, 120, false, 1, () => {
+            // Required delay to correctly dispose the scene
+            window.setTimeout(() => {
+                this.actionsHandler.menuAction();
+            }, 50);
+        });
+
+        return this.scene;
+    }
+}
+
+module.exports = Splash;
+},{"./util/color_hsl.js":5}],5:[function(require,module,exports){
+class ColorHSL {
+
+    constructor(h, s, l) {
+        this.h = h;
+        this.s = s;
+        this.l = l;
+    }
+
+    /**
+     * Converts an HSL color value to RGB. Conversion formula
+     * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+     * Assumes h, s, and l are contained in the set [0, 1] and
+     * returns r, g, and b in the set [0, 1].
+     *
+     * @param   {number}  h       The hue
+     * @param   {number}  s       The saturation
+     * @param   {number}  l       The lightness
+     * @return  {Color3}          The RGB representation
+     */
+    toColor3() {
+        let r, g, b;
+
+        if (this.s == 0) {
+            r = g = b = this.l; // achromatic
+        }
+        else {
+            let hue2rgb = function hue2rgb(p, q, t) {
+                if (t < 0) t += 1;
+                if (t > 1) t -= 1;
+                if (t < 1 / 6) return p + (q - p) * 6 * t;
+                if (t < 1 / 2) return q;
+                if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+                return p;
+            }
+
+            let q = this.l < 0.5 ? this.l * (1 + this.s) : this.l + this.s - this.l * this.s;
+            let p = 2 * this.l - q;
+            r = hue2rgb(p, q, this.h + 1 / 3);
+            g = hue2rgb(p, q, this.h);
+            b = hue2rgb(p, q, this.h - 1 / 3);
+        }
+        return new BABYLON.Color3(r, g, b);
+    }
+
+    /**
+     * Converts an RGB color value to HSL. Conversion formula
+     * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+     * Assumes r, g, and b are contained in the set [0, 1] and
+     * returns h, s, and l in the set [0, 1].
+     *
+     * @param   {number}  r       The red color value
+     * @param   {number}  g       The green color value
+     * @param   {number}  b       The blue color value
+     */
+    fromColor3(r, g, b) {
+        let max = Math.max(r, g, b), min = Math.min(r, g, b);
+        this.h = (max + min) / 2;
+        this.s = (max + min) / 2;
+        this.l = (max + min) / 2;
+
+        if (max == min) {
+            this.h = this.s = 0; // achromatic
+        }
+        else {
+            let d = max - min;
+            this.s = this.l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r: this.h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: this.h = (b - r) / d + 2; break;
+                case b: this.h = (r - g) / d + 4; break;
+            }
+            this.h /= 6;
+        }
+    }
+
+    toRGBString() {
+        let color3 = this.toColor3();
+        let r = Math.floor(color3.r * 255);
+        let g = Math.floor(color3.g * 255);
+        let b = Math.floor(color3.b * 255);
+        return "rgb(" + r + "," + g + "," + b + ")";
+    }
+
+    toColor4(a = 1) {
+        let color3 = this.toColor3();
+        return new BABYLON.Color4(color3.r, color3.g, color3.b, a);
+    }
+}
+
+module.exports = ColorHSL;
+},{}]},{},[1]);

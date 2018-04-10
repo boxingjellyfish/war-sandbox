@@ -10,9 +10,11 @@ const Chat = require("./chat.js");
 
 const PORT = process.env.PORT || 3000;
 const INDEX = path.join(__dirname, "../../index.html");
+const TEST = path.join(__dirname, "../../test.html");
 
 const server = express()
     .use(express.static("public"))
+    .use("/test",(req, res) => res.sendFile(TEST))
     .use((req, res) => res.sendFile(INDEX))
     .listen(PORT, () => console.log("Listening on " + PORT));
 
